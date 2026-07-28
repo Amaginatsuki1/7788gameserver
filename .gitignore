@@ -13,6 +13,8 @@
 
 # testing
 /coverage
+__pycache__/
+*.py[cod]
 
 # next.js
 /.next/
@@ -22,6 +24,8 @@
 # misc
 .DS_Store
 *.pem
+/password.txt
+/hk_known_hosts_current
 
 # debug
 npm-debug.log*

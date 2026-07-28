@@ -90,7 +90,7 @@ export function ModExplorer({
           ) : (
             <div className="mod-preview-placeholder">
               <span className="mono-label">MOD PREVIEW</span>
-              <p>将鼠标移到模组名称上查看图标，点击后展开详细介绍。</p>
+              <p>将鼠标移到条目上查看内容，点击后展开详细介绍。</p>
             </div>
           )}
         </div>
@@ -98,7 +98,7 @@ export function ModExplorer({
 
       <div
         className="mod-list"
-        aria-label={`完整模组清单，共 ${mods.length} 项`}
+        aria-label={`${titleLines.join("")}，共 ${mods.length} 项`}
         onMouseLeave={() => setHoveredIndex(null)}
       >
         {mods.map((mod, index) => {

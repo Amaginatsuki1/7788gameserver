@@ -8,36 +8,72 @@ export const metadata: Metadata = {
 
 const updates = [
   {
-    date: "2026.07.26",
-    tag: "MODPACK",
-    title: "模组清单更新为 7788-2",
-    body: "服务器与网站已同步最新的 28 项启用清单，保留灾厄主线并调整辅助模组组合。",
-    points: [
-      "新增 WMITF 与 Census",
-      "移除 Catalyst Mod 与 ArmamentDisplay",
-      "Consolaria 更新至 2.2.3",
+    date: "2026.07.25",
+    title: "服务器配置完成",
+    subtitle: "完成系统准备工作，尚未进行设置修改。",
+    details: ["完成自动备份", "高负载缓冲", "驱动及运行库安装"],
+  },
+  {
+    date: "2026.07.25",
+    title: "服务器设置修改",
+    subtitle: "按 Minecraft + Terraria 双服思路修改配置。",
+    details: ["待实际服务端接入后再排查问题"],
+  },
+  {
+    date: "2026.07.25",
+    title: "测试 Terraria 模组冲突",
+    subtitle: "出现 SpringStoolJumpHotKey，且客户端触发钩子。",
+    details: [
+      "移除 Catalyst Mod",
+      "移除 ArmamentDisplay",
+      "移除 Automated Mining",
+      "BAM v1.2.5 在专用服务器稳定触发集合异常、并发字典错误",
     ],
   },
   {
     date: "2026.07.25",
-    tag: "MINECRAFT",
-    title: "Minecraft 冒险生存服内容框架完成",
-    body: "第二个世界以 Create 自动化、农夫乐事与维度探索为核心，兼顾长期建设和随时回归的联机节奏。",
-    points: ["Forge 1.20.1", "最多 5 人", "使用 mc.7788oio.icu 连接"],
+    title: "更新 Terraria 模组列表",
+    subtitle: "重新打包，并配置双端同步。",
+    details: ["新增 WMITF、Census", "Consolaria 更新至 2.2.3"],
   },
   {
-    date: "2026.07.24",
-    tag: "TERRARIA",
-    title: "探索战斗服完成公网真人进服验证",
-    body: "tModLoader 世界已完成生成、保存、重启与公网连接验证，页面同步展示服务器配置与加入方式。",
-    points: ["tr.7788oio.icu:18035 已可连接", "28 个客户端启用模组", "大型专家世界"],
+    date: "2026.07.26",
+    title: "Terraria 服务端上线",
+    subtitle: "通过域名映射上线服务端并完成测试。",
+    details: ["移除后无阻止加载的新错误", "在线操作延迟较高，待优化"],
   },
   {
-    date: "2026.07.24",
-    tag: "MODPACK",
-    title: "移除 BAM，完成干净加载测试",
-    body: "BAM v1.2.5 在专用服务器稳定触发并发集合异常，经确认后从本地包和服务器同步移除。",
-    points: ["保留本地与服务器备份", "移除后无阻止加载的新错误", "本地与服务器模组清单保持同步"],
+    date: "2026.07.26",
+    title: "网站上线",
+    subtitle: "此网站初版上线，目前仅有两份进服教程静态页面。",
+    details: [
+      "目前和 PDF 没有区别，待优化并对接游戏服务器",
+      "仅作此次上线记录，此后网站前后端修改不记录",
+    ],
+  },
+  {
+    date: "2026.07.26",
+    title: "Terraria 完成 IP 进服",
+    subtitle: "服务器公网 IP 解析到域名并完成测试。",
+    details: [
+      "DNS 解析从 Cloudflare 迁移到国内服务器",
+      "优化网络延迟，启用公网 TCP 加速访问",
+    ],
+  },
+  {
+    date: "2026.07.27",
+    title: "更新 Terraria 模组列表，完成身份配置",
+    subtitle: "更新到最新版模组列表，细化各模组内设置并完成测试。",
+    details: [
+      "新增 Old Grape Beer 6.9",
+      "收紧可实时更改的服务端模组权限管理",
+    ],
+  },
+  {
+    date: "2026.07.28",
+    title: "Terraria 正式创建世界",
+    subtitle: "模组已经确认，正式创建 Terraria 世界。",
+    details: ["Terraria 服务端正式上线，进服办法详见 Terraria 页面"],
   },
 ];
 
@@ -50,21 +86,29 @@ export default function UpdatesPage() {
           CHANGELOG / PUBLIC NOTES
         </div>
         <h1>每一次世界变化<br />都留下记录</h1>
-        <p>这里只发布玩家需要知道的内容。部署凭据、密码和管理日志不会出现在公开页面。</p>
+        <p>
+          按时间记录服务器、模组与世界的
+          <span className="phrase-nowrap">关键变化</span>，具体调整集中列在每条记录下。
+        </p>
       </section>
 
       <section className="timeline page-shell">
-        {updates.map((update) => (
+        {updates.map((update, updateIndex) => (
           <article className="timeline-item" key={`${update.date}-${update.title}`}>
             <div className="timeline-meta">
               <span>{update.date}</span>
-              <strong>{update.tag}</strong>
+              <strong>RECORD / {String(updateIndex + 1).padStart(2, "0")}</strong>
             </div>
             <div className="timeline-content">
               <h2>{update.title}</h2>
-              <p>{update.body}</p>
-              <ul>
-                {update.points.map((point) => <li key={point}>{point}</li>)}
+              <h3>{update.subtitle}</h3>
+              <ul className="timeline-details">
+                {update.details.map((detail, detailIndex) => (
+                  <li key={detail}>
+                    <span>{String(detailIndex + 1).padStart(2, "0")}</span>
+                    <p>{detail}</p>
+                  </li>
+                ))}
               </ul>
             </div>
           </article>

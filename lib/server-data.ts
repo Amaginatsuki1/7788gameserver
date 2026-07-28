@@ -159,109 +159,32 @@ export const terrariaMods: ModInfo[] = [
     "Wing Slot Extra",
     "增加独立翅膀栏位，避免飞行装备长期占用普通饰品槽。",
   ),
+  steamWorkshopMod(
+    "3744518122",
+    "复古葡萄啤酒 (Old Grape Beer)",
+    "复刻灾厄 2.1 的葡萄啤酒增益，让弹药获得强追踪，并以暴击伤害、防御和移速为代价，支持 ImproveGame 无限增益。",
+  ),
 ];
 
 export const minecraftMods: ModInfo[] = [
   {
-    id: "create",
-    name: "Create",
-    description: "用齿轮、传动与动力网络搭建自动化产线和交通系统。",
+    id: "todo-content",
+    name: "待办 01 · 内容方向",
+    description: "待定。",
   },
   {
-    id: "farmers-delight",
-    name: "Farmer's Delight",
-    description: "扩展种植、烹饪与餐食系统，让农场和厨房成为聚落的一部分。",
+    id: "todo-loader",
+    name: "待办 02 · 版本与加载器",
+    description: "待定。",
   },
   {
-    id: "twilight-forest",
-    name: "The Twilight Forest",
-    description: "加入独立探索维度、首领路线、迷宫与大量独特战利品。",
+    id: "todo-modpack",
+    name: "待办 03 · 模组清单",
+    description: "待定。",
   },
   {
-    id: "alexs-mobs",
-    name: "Alex's Mobs",
-    description: "为主世界与其他维度补充具有独特行为的新生物。",
-  },
-  {
-    id: "waystones",
-    name: "Waystones",
-    description: "通过可发现和建造的传送石连接聚落、据点与探索区域。",
-  },
-  {
-    id: "sophisticated-backpacks",
-    name: "Sophisticated Backpacks",
-    description: "提供可升级、可过滤并带有功能模块的随身储物系统。",
-  },
-  {
-    id: "sophisticated-storage",
-    name: "Sophisticated Storage",
-    description: "扩展箱子和木桶容量，并加入过滤、压缩等仓储升级。",
-  },
-  {
-    id: "supplementaries",
-    name: "Supplementaries",
-    description: "补充适合建筑、装饰和互动的原版风格方块与小功能。",
-  },
-  {
-    id: "quark",
-    name: "Quark",
-    description: "以贴近原版的方式扩展建造、探索和日常操作体验。",
-  },
-  {
-    id: "artifacts",
-    name: "Artifacts",
-    description: "在探索与战利品中加入具有独特能力的饰品和装备。",
-  },
-  {
-    id: "yungs-better-dungeons",
-    name: "YUNG's Better Dungeons",
-    description: "重做地下城结构，让探索路线、规模和战斗更有层次。",
-  },
-  {
-    id: "jade",
-    name: "Jade",
-    description: "查看准星指向方块和实体的信息，方便理解机器与存储状态。",
+    id: "todo-test",
+    name: "待办 04 · 联机信息",
+    description: "待定。",
   },
 ];
-
-export const resourceHistory = {
-  cpu: [
-    22, 18, 16, 25, 31, 28, 24, 20, 18, 29, 37, 41, 34, 30, 26, 33, 46, 39,
-    31, 27, 24, 21, 19, 18,
-  ],
-  memory: [
-    23, 23, 24, 24, 25, 25, 26, 26, 26, 27, 27, 28, 28, 28, 29, 30, 29, 29,
-    28, 28, 27, 27, 27, 27,
-  ],
-};
-
-export const gameRuntimeSnapshots = [
-  {
-    id: "terraria",
-    eyebrow: "SERVICE / TERRARIA",
-    title: "探索战斗服",
-    players: 2,
-    address: "tr.7788oio.icu:18035",
-    version: "tML v2026.05.3.0",
-    world: "Calamity-main",
-    maxPlayers: 5,
-    cpu: 11,
-    memory: 15,
-    processMemory: "2.4 GB",
-    demoLatency: 42,
-  },
-  {
-    id: "minecraft",
-    eyebrow: "SERVICE / MINECRAFT",
-    title: "Java 整合服",
-    players: 1,
-    address: "mc.7788oio.icu",
-    version: "Forge 1.20.1",
-    world: "7788-home",
-    maxPlayers: 5,
-    cpu: 7,
-    memory: 9,
-    processMemory: "1.4 GB",
-    demoLatency: 58,
-  },
-] as const;

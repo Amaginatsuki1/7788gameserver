@@ -5,7 +5,7 @@ import type { CSSProperties } from "react";
 
 type ResourceTrendChartProps = {
   label: string;
-  data: number[];
+  data: number[] | null;
   color: string;
   period?: string;
 };
@@ -51,12 +51,16 @@ export function ResourceTrendChart({
   period = "过去 24 小时",
 }: ResourceTrendChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const current = data.at(-1) ?? 0;
-  const peak = Math.max(...data);
-  const average = Math.round(
-    data.reduce((total, value) => total + value, 0) / Math.max(data.length, 1),
-  );
-  const health = getHealth(current);
+  const hasData = Boolean(data?.length);
+  const current = data?.at(-1) ?? null;
+  const peak = data?.length ? Math.max(...data) : null;
+  const average = data?.length
+    ? Math.round(data.reduce((total, value) => total + value, 0) / data.length)
+    : null;
+  const health =
+    current === null
+      ? { key: "unknown", label: "数据暂不可用", color: "#d4aa62" }
+      : getHealth(current);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -75,15 +79,17 @@ export function ResourceTrendChart({
 
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
       context.clearRect(0, 0, bounds.width, bounds.height);
+      if (!data?.length) return;
 
       const insetX = 8;
       const insetY = 12;
       const chartWidth = Math.max(bounds.width - insetX * 2, 1);
       const chartHeight = Math.max(bounds.height - insetY * 2, 1);
-      const points = data.map((value, index) => ({
+      const plotData = data.length === 1 ? [data[0], data[0]] : data;
+      const points = plotData.map((value, index) => ({
         x:
           insetX +
-          (index / Math.max(data.length - 1, 1)) *
+          (index / Math.max(plotData.length - 1, 1)) *
             chartWidth,
         y: insetY + (1 - value / 100) * chartHeight,
       }));
@@ -144,7 +150,7 @@ export function ResourceTrendChart({
           <p>{period}</p>
         </div>
         <div className="resource-current">
-          <strong>{current}%</strong>
+          <strong>{current === null ? "—" : `${current}%`}</strong>
           <span>
             <i aria-hidden />
             {health.label}
@@ -155,7 +161,11 @@ export function ResourceTrendChart({
       <div
         className="resource-plot"
         role="img"
-        aria-label={`${label} ${period}趋势，当前 ${current}%，平均 ${average}%，峰值 ${peak}%，${health.label}`}
+        aria-label={
+          hasData
+            ? `${label} ${period}趋势，当前 ${current}%，平均 ${average}%，峰值 ${peak}%，${health.label}`
+            : `${label} ${period}趋势暂不可用`
+        }
       >
         <div className="resource-axis" aria-hidden>
           <span>100</span>
@@ -167,15 +177,18 @@ export function ResourceTrendChart({
           <span className="resource-threshold threshold-high" aria-hidden />
           <span className="resource-threshold threshold-watch" aria-hidden />
           <canvas ref={canvasRef} aria-hidden />
+          {!hasData && (
+            <span className="resource-chart-empty">等待有效采样</span>
+          )}
         </div>
       </div>
 
       <div className="resource-chart-meta">
         <span>
-          平均 <strong>{average}%</strong>
+          平均 <strong>{average === null ? "—" : `${average}%`}</strong>
         </span>
         <span>
-          峰值 <strong>{peak}%</strong>
+          峰值 <strong>{peak === null ? "—" : `${peak}%`}</strong>
         </span>
         <span>24 小时前 → 现在</span>
       </div>

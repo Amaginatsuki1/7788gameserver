@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -42,7 +43,7 @@ const publicRoutes = [
   ["/terraria", /Terraria/],
   ["/terraria/join", /进服教程/],
   ["/minecraft", /Minecraft/],
-  ["/minecraft/join", /进服教程/],
+  ["/minecraft/join", /四项待办/],
   ["/status", /世界运行状态/],
   ["/updates", /每一次世界变化/],
 ];
@@ -55,3 +56,197 @@ for (const [pathname, marker] of publicRoutes) {
     assert.match(await response.text(), marker);
   });
 }
+
+test("updates page renders the document A/B/C hierarchy", async () => {
+  const response = await render("/updates");
+  const html = await response.text();
+
+  assert.match(html, /服务器配置完成/);
+  assert.match(html, /完成系统准备工作，尚未进行设置修改/);
+  assert.match(html, /完成自动备份/);
+  assert.match(html, /Terraria 正式创建世界/);
+  assert.match(html, /class="timeline-details"/);
+  assert.doesNotMatch(html, />[abc]\s/);
+});
+
+test("status dashboard uses the exact public API endpoint", async () => {
+  const source = await readFile(
+    new URL("../components/status-dashboard.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(
+    source,
+    /const STATUS_API_URL = "https:\/\/7788oio\.icu\/api\/status"/,
+  );
+  assert.doesNotMatch(source, /api\/status\?/);
+  assert.doesNotMatch(source, /演示数据/);
+});
+
+test("status dashboard refreshes while visible and immediately after returning", async () => {
+  const source = await readFile(
+    new URL("../components/status-dashboard.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(source, /const STATUS_POLL_INTERVAL_MS = 10_000/);
+  assert.match(source, /document\.visibilityState === "hidden"/);
+  assert.match(source, /document\.addEventListener\("visibilitychange"/);
+  assert.match(source, /window\.addEventListener\("focus"/);
+  assert.match(source, /window\.addEventListener\("online"/);
+  assert.match(source, /页面自动更新/);
+  assert.match(source, /aria-live="polite"/);
+});
+
+test("status page keeps the simplified public labels", async () => {
+  const pageSource = await readFile(
+    new URL("../app/status/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const dashboardSource = await readFile(
+    new URL("../components/status-dashboard.tsx", import.meta.url),
+    "utf8",
+  );
+  const latencySource = await readFile(
+    new URL("../components/latency-tester.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(pageSource, /在线人数，服务状态，主机资源/);
+  assert.match(latencySource, /你的设备到游戏服/);
+  assert.match(latencySource, /你的设备到此网页/);
+  assert.doesNotMatch(latencySource, /采样次数/);
+  assert.match(latencySource, /Promise\.all/);
+  assert.match(latencySource, /runServiceProbe/);
+  assert.match(latencySource, /statusLabel: "游戏服"/);
+  assert.match(latencySource, /statusLabel: "此网页"/);
+  assert.match(latencySource, /latency-quality-group/);
+  assert.match(pageSource, /websiteEndpoint: "\/latency-probe\.txt"/);
+  assert.match(pageSource, /label: "泰拉服"/);
+  assert.match(pageSource, /label: "MC服"/);
+  assert.match(dashboardSource, /<h2>泰拉服<\/h2>/);
+  assert.match(dashboardSource, /<h2>MC服<\/h2>/);
+  assert.match(dashboardSource, /最近备份/);
+  assert.match(dashboardSource, /在线人数暂不可用/);
+  assert.match(dashboardSource, /香港节点探针/);
+  assert.match(dashboardSource, /此网站到游戏主机 HTTPS 探针/);
+  assert.match(dashboardSource, /HK NODE \/ HTTPS/);
+  assert.doesNotMatch(dashboardSource, /HK NODE \/ TCP/);
+  assert.match(pageSource, /数据误差/);
+  assert.match(pageSource, /页面数据存在一定延迟，且不完全准确/);
+});
+
+test("Terraria mod data includes the latest shared workshop item", async () => {
+  const source = await readFile(
+    new URL("../lib/server-data.ts", import.meta.url),
+    "utf8",
+  );
+  const pageSource = await readFile(
+    new URL("../app/terraria/page.tsx", import.meta.url),
+    "utf8",
+  );
+  const workshopImage = await readFile(
+    new URL("../public/mod-terraria-3744518122.jpg", import.meta.url),
+  );
+
+  assert.match(source, /"3744518122"/);
+  assert.match(source, /复古葡萄啤酒 \(Old Grape Beer\)/);
+  assert.match(pageSource, /value: "29"/);
+  const workshopIds = [
+    ...source.matchAll(/steamWorkshopMod\(\s*"(\d+)"/g),
+  ].map((match) => match[1]);
+  assert.equal(workshopIds.length, 29);
+  assert.equal(new Set(workshopIds).size, 29);
+  assert.doesNotMatch(source, /OioAdmin|HighFPSSupport/);
+  assert.ok(workshopImage.byteLength > 1_000);
+});
+
+test("Terraria public facts match the deployed game server", async () => {
+  const [homeSource, pageSource, joinSource, backendSource] = await Promise.all(
+    [
+      "../app/page.tsx",
+      "../app/terraria/page.tsx",
+      "../app/terraria/join/page.tsx",
+      "../monitoring-backend/status_backend.py",
+    ].map((pathname) => readFile(new URL(pathname, import.meta.url), "utf8")),
+  );
+  const combined = [homeSource, pageSource, joinSource, backendSource].join("\n");
+
+  assert.match(homeSource, /大世界 · 大师 · 猩红/);
+  assert.match(pageSource, /value: "大世界 · 大师 · 猩红"/);
+  assert.match(pageSource, /value: "每日 06:29 自动备份"/);
+  assert.match(backendSource, /"world": "oio的冒险"/);
+  assert.match(backendSource, /"worldType": "大世界 · 大师 · 猩红"/);
+  assert.match(backendSource, /"maxPlayers": 5/);
+  assert.match(backendSource, /"modCount": 29/);
+  assert.match(combined, /Terraria 1\.4\.4\.9/);
+  assert.match(combined, /tModLoader (?:v)?2026\.05\.3\.0/);
+  assert.match(combined, /tr\.7788oio\.icu:18035/);
+  assert.doesNotMatch(combined, /Large \/ Expert|大型专家世界|灾厄测试服/);
+});
+
+test("formal copy and mobile guide layout keep the public pages release-ready", async () => {
+  const [
+    layoutSource,
+    terrariaSource,
+    terrariaJoinSource,
+    addressSource,
+    headerSource,
+    cssSource,
+  ] = await Promise.all(
+    [
+      "../app/layout.tsx",
+      "../app/terraria/page.tsx",
+      "../app/terraria/join/page.tsx",
+      "../components/address-block.tsx",
+      "../components/site-header.tsx",
+      "../app/globals.css",
+    ].map((pathname) => readFile(new URL(pathname, import.meta.url), "utf8")),
+  );
+
+  assert.match(layoutSource, /Terraria 探索战斗服的内容、教程与状态/);
+  assert.match(layoutSource, /hero-minecraft-blue-hour\.png/);
+  assert.doesNotMatch(layoutSource, /images: \["\/og\.png"\]/);
+  assert.match(terrariaSource, /7788 Terraria 探索战斗服的玩法、版本和模组概览/);
+  assert.doesNotMatch(`${layoutSource}\n${terrariaSource}`, /Terraria 灾厄服|灾厄整合服/);
+  assert.match(addressSource, /disabled=\{addressPending\}/);
+  assert.match(addressSource, /addressPending \? "待定"/);
+  assert.match(headerSource, /aria-label="查看服务器状态"/);
+  assert.match(terrariaJoinSource, /如果打不出字母/);
+  assert.match(terrariaJoinSource, /先检查是不是忘记切换英文输入法/);
+  assert.match(cssSource, /\.guide-input-tip\s*\{/);
+  assert.match(
+    cssSource,
+    /\.guide-visual-frame\s*\{[\s\S]*?width:\s*100%;[\s\S]*?aspect-ratio:\s*auto;/,
+  );
+  assert.doesNotMatch(cssSource, /var\(--slate\)/);
+});
+
+test("Minecraft keeps its page layouts with TODO-only content", async () => {
+  const sources = await Promise.all(
+    [
+      "../app/page.tsx",
+      "../app/minecraft/page.tsx",
+      "../app/minecraft/join/page.tsx",
+      "../app/updates/page.tsx",
+      "../components/status-dashboard.tsx",
+      "../components/latency-tester.tsx",
+    ].map((pathname) => readFile(new URL(pathname, import.meta.url), "utf8")),
+  );
+  const combined = sources.join("\n");
+
+  assert.match(combined, /Minecraft 内容待定/);
+  assert.match(combined, /statusTone="planning"/);
+  assert.match(combined, /四项待办/);
+  assert.match(combined, /版本与加载器待定/);
+  assert.match(combined, /模组清单待定/);
+  assert.match(combined, /body: "待定。"/);
+  assert.doesNotMatch(
+    combined,
+    /页面结构|页面布局|待办结构|后续只需|补全正式|发布前复核/,
+  );
+  assert.doesNotMatch(
+    combined,
+    /Forge 47|Minecraft Java 1\.20\.1|mc\.7788oio\.icu|Create \/ Settlement|冒险生存/,
+  );
+});

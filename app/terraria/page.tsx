@@ -4,7 +4,7 @@ import { terrariaMods } from "@/lib/server-data";
 
 export const metadata: Metadata = {
   title: "Terraria 探索战斗服",
-  description: "7788 Terraria tModLoader 灾厄整合服的玩法、版本和模组概览。",
+  description: "7788 Terraria 探索战斗服的玩法、版本和模组概览。",
 };
 
 export default function TerrariaPage() {
@@ -12,16 +12,16 @@ export default function TerrariaPage() {
     <GameDetailPage
       worldLabel="WORLD 01 / TERRARIA"
       titleLines={["Terraria"]}
-      description="以 Calamity 为主线的五人小服。保留大型内容模组带来的探索感，再用合成查询、魔法存储和体验优化减少重复劳动。"
+      description="以 Calamity 为主线的五人小服。大型内容模组带来探索与挑战。合成查询、魔法存储等功能，则减少重复劳动。"
       joinHref="/terraria/join"
       statusLabel="探索战斗"
       specs={[
         { label: "游戏版本", value: "Terraria 1.4.4.9" },
         { label: "加载器", value: "tModLoader 2026.05.3.0" },
-        { label: "世界类型", value: "Large / Expert" },
-        { label: "启用模组", value: "28" },
+        { label: "世界类型", value: "大世界 · 大师 · 猩红" },
+        { label: "启用模组", value: "29" },
         { label: "核心玩法", value: "Calamity / Boss Progression" },
-        { label: "存档策略", value: "定时自动备份" },
+        { label: "存档策略", value: "每日 06:29 自动备份" },
       ]}
       address="tr.7788oio.icu:18035"
       profileLabel="PLAY STYLE"
@@ -46,7 +46,7 @@ export default function TerrariaPage() {
       ]}
       mods={terrariaMods}
       modTitleLines={["完整模组清单"]}
-      modDescription="完整列出整合包当前启用的 28 个模组，包括内容、前置、汉化与客户端体验组件。"
+      modDescription="完整列出整合包当前启用的 29 个模组，包括内容、前置、汉化与客户端体验组件。"
       closingLabel="CO-OP / FIVE PLAYERS"
       closingTitle="慢慢推进，随时回来。"
       closingBody="Boss 进度和公共资源由大家一起维护；个人装备、建筑与探索路线则保留各自的节奏。"

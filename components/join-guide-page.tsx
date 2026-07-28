@@ -25,6 +25,10 @@ export type GuideStep = {
     label: string;
     href: string;
   };
+  inputTip?: {
+    lead: string;
+    detail: string;
+  };
 };
 
 export type GuideHelpItem = {
@@ -152,6 +156,15 @@ export function JoinGuidePage({
                     <span>NOTE</span>
                     {step.note}
                   </div>
+                  {step.inputTip ? (
+                    <div className="guide-input-tip" role="note">
+                      <span className="mono-label">INPUT / 输入提示</span>
+                      <strong>
+                        <span>{step.inputTip.lead}</span>
+                        <span>{step.inputTip.detail}</span>
+                      </strong>
+                    </div>
+                  ) : null}
                 </div>
 
                 <figure className="guide-step-visual">

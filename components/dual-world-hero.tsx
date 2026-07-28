@@ -155,7 +155,7 @@ export function DualWorldHero({ children }: DualWorldHeroProps) {
       <div className="dual-world-scene" aria-hidden="true">
         <img
           className="dual-world-image dual-world-base"
-          src="/hero-minecraft-blue-hour.png"
+          src="/hero-minecraft-blue-hour.webp"
           alt=""
           draggable="false"
           fetchPriority="high"
@@ -163,7 +163,7 @@ export function DualWorldHero({ children }: DualWorldHeroProps) {
         <div className="dual-world-reveal">
           <img
             className="dual-world-image"
-            src="/hero-terraria-calamity-reveal.png"
+            src="/hero-terraria-calamity-reveal.webp"
             alt=""
             draggable="false"
             fetchPriority="high"

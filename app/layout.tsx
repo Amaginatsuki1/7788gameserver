@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s · 7788 游戏服务器",
   },
   description:
-    "Terraria 灾厄与 Minecraft 私人整合服的内容介绍、进服教程和运行状态。",
+    "Terraria 探索战斗服的内容、教程与状态；Minecraft 世界信息待定。",
   openGraph: {
     title: "7788 游戏服务器",
     description: "两片世界，一个网站。在玩什么、信息汇总与此刻状态。",
@@ -19,10 +19,10 @@ export const metadata: Metadata = {
     siteName: "7788 游戏服务器",
     images: [
       {
-        url: "/og.png",
-        width: 1734,
-        height: 907,
-        alt: "7788 游戏服务器 — Terraria 与 Minecraft",
+        url: "/hero-minecraft-blue-hour.png",
+        width: 1983,
+        height: 793,
+        alt: "7788 游戏服务器首页主视觉",
       },
     ],
   },
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "7788 游戏服务器",
     description: "两片世界，一个网站。在玩什么、信息汇总与此刻状态。",
-    images: ["/og.png"],
+    images: ["/hero-minecraft-blue-hour.png"],
   },
 };
 

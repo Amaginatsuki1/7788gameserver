@@ -7,13 +7,15 @@ const serverSummaries = [
     index: "01",
     game: "Terraria",
     version: "1.4.4.9 · tModLoader 2026.05.3.0",
-    mods: "28",
+    mods: "29",
+    modsLabel: "启用模组",
   },
   {
     index: "02",
     game: "Minecraft",
-    version: "1.20.1 · Forge 47.x",
-    mods: "12",
+    version: "版本与加载器待定",
+    mods: "—",
+    modsLabel: "模组待定",
   },
 ];
 
@@ -26,7 +28,7 @@ export default function Home() {
           <p className="hero-lead">
             在玩什么，信息汇总，此刻状态。
           </p>
-          <p className="micro-note">Terraria 探索战斗 · Minecraft 冒险生存</p>
+          <p className="micro-note">Terraria 探索战斗 · Minecraft 内容待办</p>
         </div>
         <div className="hero-worldbar page-shell" aria-label="服务器世界概览">
           <div className="worldbar-intro">
@@ -37,7 +39,7 @@ export default function Home() {
             <span>01</span>
             <div>
               <strong>Terraria · Calamity</strong>
-              <small>Calamity · Large / Expert</small>
+              <small>大世界 · 大师 · 猩红</small>
             </div>
             <StatusBadge tone="online">探索战斗</StatusBadge>
           </div>
@@ -45,9 +47,9 @@ export default function Home() {
             <span>02</span>
             <div>
               <strong>Minecraft · Java</strong>
-              <small>Create · 探索 · 聚落生活</small>
+              <small>版本 · 模组 · 玩法待定</small>
             </div>
-            <StatusBadge tone="online">冒险生存</StatusBadge>
+            <StatusBadge tone="planning">待办</StatusBadge>
           </div>
         </div>
       </DualWorldHero>
@@ -62,7 +64,7 @@ export default function Home() {
             </div>
             <div className="server-summary-mods">
               <strong>{server.mods}</strong>
-              <span>启用模组</span>
+              <span>{server.modsLabel}</span>
             </div>
           </article>
         ))}
@@ -80,7 +82,7 @@ export default function Home() {
           <p>
             两个世界使用同一套清晰入口
             <br />
-            Terraria 冒险战斗，Minecraft 建造生存
+            Terraria 冒险战斗，Minecraft 内容待定
           </p>
         </div>
 
@@ -112,19 +114,18 @@ export default function Home() {
           <article className="game-card game-card-light">
             <div className="game-card-head">
               <span className="game-index">02</span>
-              <StatusBadge tone="online">冒险生存</StatusBadge>
+              <StatusBadge tone="planning">待办</StatusBadge>
             </div>
             <div className="game-card-body">
               <p className="mono-label">MINECRAFT / JAVA</p>
-              <h3>造机器，也造一座家。</h3>
+              <h3>Minecraft 内容待定</h3>
               <p>
-                围绕 Create、农夫乐事与探索维度展开。自动化不是终点，
-                而是让五个人有更多时间建造、生活和远行。
+                游戏版本、加载器、玩法、模组与连接方式待定。
               </p>
               <div className="tag-row">
-                <span>机械动力</span>
-                <span>聚落生活</span>
-                <span>维度探索</span>
+                <span>版本待定</span>
+                <span>模组待定</span>
+                <span>玩法待定</span>
               </div>
             </div>
             <div className="game-card-actions">
@@ -155,7 +156,7 @@ export default function Home() {
                 number: "01",
                 kicker: "CHOOSE A WORLD",
                 title: "选择想进入的世界",
-                body: "Terraria 冒险战斗，Minecraft 建造生存。",
+                body: "Terraria 可按教程进入，Minecraft 内容待定。",
               },
               {
                 number: "02",

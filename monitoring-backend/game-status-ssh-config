@@ -1,0 +1,16 @@
+# Example only: configure your own restricted read-only SSH account.
+Host game-status
+    HostName game-host.example.com
+    Port 22
+    User statusprobe
+    IdentityFile /var/lib/7788-monitor/ssh/statusprobe_ed25519
+    UserKnownHostsFile /var/lib/7788-monitor/ssh/game_known_hosts
+    StrictHostKeyChecking yes
+    BatchMode yes
+    PasswordAuthentication no
+    KbdInteractiveAuthentication no
+    RequestTTY no
+    ConnectTimeout 10
+    ServerAliveInterval 15
+    ServerAliveCountMax 1
+    LogLevel ERROR

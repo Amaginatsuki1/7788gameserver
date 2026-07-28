@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AddressBlock } from "@/components/address-block";
 import { ModExplorer } from "@/components/mod-explorer";
-import { StatusBadge } from "@/components/status-badge";
+import { StatusBadge, type StatusTone } from "@/components/status-badge";
 import type { ModInfo } from "@/lib/server-data";
 
 type SpecItem = {
@@ -21,6 +21,7 @@ type GameDetailPageProps = {
   description: string;
   joinHref: string;
   statusLabel: string;
+  statusTone?: StatusTone;
   specs: SpecItem[];
   address: string;
   profileLabel: string;
@@ -41,6 +42,7 @@ export function GameDetailPage({
   description,
   joinHref,
   statusLabel,
+  statusTone = "online",
   specs,
   address,
   profileLabel,
@@ -84,7 +86,7 @@ export function GameDetailPage({
         <div className="spec-card elevated-card">
           <div className="spec-card-head">
             <span className="mono-label">SERVER SPECIFICATION</span>
-            <StatusBadge tone="online">{statusLabel}</StatusBadge>
+            <StatusBadge tone={statusTone}>{statusLabel}</StatusBadge>
           </div>
           <dl className="spec-list">
             {specs.map((spec) => (

@@ -20,7 +20,11 @@ export function SiteHeader() {
             <Link href={href} key={href}>{label}</Link>
           ))}
         </nav>
-        <Link className="header-status" href="/status">
+        <Link
+          className="header-status"
+          href="/status"
+          aria-label="查看服务器状态"
+        >
           <span className="live-dot" />
           <span>服务状态</span>
         </Link>

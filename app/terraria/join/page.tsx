@@ -26,7 +26,7 @@ const steps = [
   {
     number: "02",
     title: "订阅 7788 创意工坊合集",
-    body: "打开 7788 合集并点击“订阅全部”。合集包含当前服务器使用的 28 个模组，Steam 会自动开始下载。",
+    body: "打开 7788 合集并点击“订阅全部”。合集包含当前服务器使用的 29 个模组，Steam 会自动开始下载。",
     note: "等 Steam 下载队列完成后再启动 tModLoader，避免只加载到一部分模组。",
     visualLabel: "确认合集名称与创建者",
     visualTitle: "订阅服务器使用的全部模组",
@@ -64,6 +64,10 @@ const steps = [
     title: "填写服务器地址并加入",
     body: "依次进入“多人模式 → 通过 IP 加入”，新建一个人物存档。主机填写 tr.7788oio.icu，端口填写 18035，最后输入密码。",
     note: "主机和端口需要分开填写。",
+    inputTip: {
+      lead: "如果打不出字母",
+      detail: "先检查是不是忘记切换英文输入法。",
+    },
     visualLabel: "主机与端口填写示例",
     visualTitle: "分两次填写连接信息",
     visualPath: ["多人模式", "通过 IP 加入", "填写主机与端口"],
@@ -115,7 +119,7 @@ export default function JoinPage() {
         {
           label: "MOD LOAD",
           title: "启用后一直在加载？",
-          body: "首次加载 28 个模组会花一些时间。保持游戏窗口运行，不要在加载途中强制关闭。",
+          body: "首次加载 29 个模组会花一些时间。保持游戏窗口运行，不要在加载途中强制关闭。",
         },
         {
           label: "CONNECTION FAILED",
