@@ -84,6 +84,19 @@ class PublicPayloadTests(unittest.TestCase):
         self.assertIsNone(payload["terraria"]["online"])
         self.assertIsNone(payload["terraria"]["players"])
 
+    def test_latest_failed_collection_does_not_reuse_online_state(self) -> None:
+        now = int(time.time())
+        self.store.insert(sample(collected_at=now - 1))
+        self.store.insert({"collected_at": now, "source_ok": 0})
+
+        payload = status_backend.public_payload(self.store)
+
+        self.assertFalse(payload["collector"]["ok"])
+        self.assertFalse(payload["stale"])
+        self.assertIsNone(payload["terraria"]["online"])
+        self.assertIsNone(payload["terraria"]["players"])
+        self.assertIsNone(payload["terraria"]["process"]["memoryBytes"])
+
 
 class CollectorTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -125,6 +138,39 @@ class CollectorTests(unittest.TestCase):
             self.collector.collect_once()
 
         self.assertEqual(events, ["status", "probe"])
+
+    def test_inactive_service_accepts_missing_process_metrics(self) -> None:
+        normalized = self.collector.normalize(
+            {
+                "service": {"active": False, "restarts": 0},
+                "process": {"cpuUsageNSec": None, "memoryBytes": None},
+                "port": {"listening": False},
+                "host": {
+                    "logicalCpu": 4,
+                    "cpuTotalJiffies": 1000,
+                    "cpuIdleJiffies": 800,
+                    "memoryTotalBytes": 8 * 1024**3,
+                    "memoryAvailableBytes": 6 * 1024**3,
+                    "dataDiskTotalBytes": 100 * 1024**3,
+                    "dataDiskUsedBytes": 20 * 1024**3,
+                    "networkRxBytes": 1000,
+                    "networkTxBytes": 500,
+                },
+                "game": {"players": None, "statusFresh": False},
+            },
+            int(time.time()),
+            40.0,
+        )
+
+        self.assertEqual(normalized["source_ok"], 1)
+        self.assertEqual(normalized["service_active"], 0)
+        self.assertEqual(normalized["port_listening"], 0)
+        self.assertEqual(normalized["process_memory_bytes"], 0)
+
+        self.store.insert(normalized)
+        payload = status_backend.public_payload(self.store)
+        self.assertTrue(payload["collector"]["ok"])
+        self.assertFalse(payload["terraria"]["online"])
 
     def test_latency_uses_https_probe_instead_of_game_port(self) -> None:
         class Response:

@@ -17,7 +17,7 @@ export default function TerrariaPage() {
       statusLabel="探索战斗"
       specs={[
         { label: "游戏版本", value: "Terraria 1.4.4.9" },
-        { label: "加载器", value: "tModLoader 2026.05.3.0" },
+        { label: "加载器", value: "tModLoader 2026.06.3.4" },
         { label: "世界类型", value: "大世界 · 大师 · 猩红" },
         { label: "启用模组", value: "29" },
         { label: "核心玩法", value: "Calamity / Boss Progression" },

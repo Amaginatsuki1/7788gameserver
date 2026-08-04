@@ -6,7 +6,7 @@ const serverSummaries = [
   {
     index: "01",
     game: "Terraria",
-    version: "1.4.4.9 · tModLoader 2026.05.3.0",
+    version: "1.4.4.9 · tModLoader 2026.06.3.4",
     mods: "29",
     modsLabel: "启用模组",
   },

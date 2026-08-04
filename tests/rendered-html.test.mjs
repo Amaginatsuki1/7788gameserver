@@ -65,8 +65,30 @@ test("updates page renders the document A/B/C hierarchy", async () => {
   assert.match(html, /完成系统准备工作，尚未进行设置修改/);
   assert.match(html, /完成自动备份/);
   assert.match(html, /Terraria 正式创建世界/);
+  assert.match(html, /从 2026\.05\.3\.0 更新至 2026\.06\.3\.4/);
+  assert.match(html, /移除 Damage Rank/);
+  assert.match(html, /添加自制模组 DaybreakDamageTracker/);
+  assert.match(html, /更新 DaybreakDamageTracker/);
+  assert.match(html, /上线 Steam 创意工坊/);
+  assert.match(html, /从 0\.1\.2 更新至 0\.1\.3/);
+  assert.match(html, /更新 Daybreak DamageTracker/);
+  assert.match(html, /从 0\.1\.3 更新至 0\.1\.5/);
+  assert.match(html, /优化使用体验/);
+  assert.match(html, /为后续开发扩展接口/);
   assert.match(html, /class="timeline-details"/);
   assert.doesNotMatch(html, />[abc]\s/);
+
+  const newestRecord = html.indexOf("从 0.1.3 更新至 0.1.5");
+  const workshopRecord = html.indexOf("上线 Steam 创意工坊");
+  const previousRecord = html.indexOf("添加自制模组 DaybreakDamageTracker");
+  const versionRecord = html.indexOf("从 2026.05.3.0 更新至 2026.06.3.4");
+  const worldCreatedRecord = html.indexOf("Terraria 正式创建世界");
+  const oldestRecord = html.indexOf("服务器配置完成");
+  assert.ok(newestRecord < workshopRecord, "the 0.1.5 update should render first");
+  assert.ok(workshopRecord < previousRecord, "same-day updates should render newest first");
+  assert.ok(previousRecord < versionRecord, "older updates should render farther down");
+  assert.ok(versionRecord < worldCreatedRecord, "older updates should render farther down");
+  assert.ok(worldCreatedRecord < oldestRecord, "the oldest update should render last");
 });
 
 test("status dashboard uses the exact public API endpoint", async () => {
@@ -94,6 +116,7 @@ test("status dashboard refreshes while visible and immediately after returning",
   assert.match(source, /document\.addEventListener\("visibilitychange"/);
   assert.match(source, /window\.addEventListener\("focus"/);
   assert.match(source, /window\.addEventListener\("online"/);
+  assert.match(source, /!status\.collector\.ok/);
   assert.match(source, /页面自动更新/);
   assert.match(source, /aria-live="polite"/);
 });
@@ -136,7 +159,7 @@ test("status page keeps the simplified public labels", async () => {
   assert.match(pageSource, /页面数据存在一定延迟，且不完全准确/);
 });
 
-test("Terraria mod data includes the latest shared workshop item", async () => {
+test("Terraria mod data matches the latest 29-player shared list", async () => {
   const source = await readFile(
     new URL("../lib/server-data.ts", import.meta.url),
     "utf8",
@@ -148,9 +171,15 @@ test("Terraria mod data includes the latest shared workshop item", async () => {
   const workshopImage = await readFile(
     new URL("../public/mod-terraria-3744518122.jpg", import.meta.url),
   );
+  const damageTrackerImage = await readFile(
+    new URL("../public/mod-terraria-3776927292.jpg", import.meta.url),
+  );
 
   assert.match(source, /"3744518122"/);
   assert.match(source, /复古葡萄啤酒 \(Old Grape Beer\)/);
+  assert.match(source, /"3776927292"/);
+  assert.match(source, /Daybreak DamageTracker/);
+  assert.doesNotMatch(source, /"3423180893"|"Damage Rank"/);
   assert.match(pageSource, /value: "29"/);
   const workshopIds = [
     ...source.matchAll(/steamWorkshopMod\(\s*"(\d+)"/g),
@@ -159,6 +188,7 @@ test("Terraria mod data includes the latest shared workshop item", async () => {
   assert.equal(new Set(workshopIds).size, 29);
   assert.doesNotMatch(source, /OioAdmin|HighFPSSupport/);
   assert.ok(workshopImage.byteLength > 1_000);
+  assert.ok(damageTrackerImage.byteLength > 1_000);
 });
 
 test("Terraria public facts match the deployed game server", async () => {
@@ -180,7 +210,8 @@ test("Terraria public facts match the deployed game server", async () => {
   assert.match(backendSource, /"maxPlayers": 5/);
   assert.match(backendSource, /"modCount": 29/);
   assert.match(combined, /Terraria 1\.4\.4\.9/);
-  assert.match(combined, /tModLoader (?:v)?2026\.05\.3\.0/);
+  assert.match(combined, /tModLoader (?:v)?2026\.06\.3\.4/);
+  assert.doesNotMatch(combined, /tModLoader (?:v)?2026\.05\.3\.0/);
   assert.match(combined, /tr\.7788oio\.icu:18035/);
   assert.doesNotMatch(combined, /Large \/ Expert|大型专家世界|灾厄测试服/);
 });

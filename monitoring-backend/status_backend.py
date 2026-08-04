@@ -242,18 +242,27 @@ class Collector:
         port = source["port"]
         host = source["host"]
         game = source["game"]
+        service_active = bool(service["active"])
 
         logical_cpu = max(1, int(host["logicalCpu"]))
         cpu_total = int(host["cpuTotalJiffies"])
         cpu_idle = int(host["cpuIdleJiffies"])
-        process_cpu_ns = int(process["cpuUsageNSec"])
+        process_cpu_ns = (
+            int(process["cpuUsageNSec"])
+            if service_active
+            else 0
+        )
         memory_total = int(host["memoryTotalBytes"])
         memory_available = int(host["memoryAvailableBytes"])
         disk_total = int(host["dataDiskTotalBytes"])
         disk_used = int(host["dataDiskUsedBytes"])
         network_rx = int(host["networkRxBytes"])
         network_tx = int(host["networkTxBytes"])
-        process_memory = int(process["memoryBytes"])
+        process_memory = (
+            int(process["memoryBytes"])
+            if service_active
+            else 0
+        )
 
         host_cpu_percent = None
         process_cpu_percent = None
@@ -261,7 +270,10 @@ class Collector:
         network_tx_rate = None
         monotonic_now = time.monotonic()
 
-        if self.previous is not None:
+        if (
+            self.previous is not None
+            and bool(self.previous["service_active"]) == service_active
+        ):
             total_delta = cpu_total - int(self.previous["cpu_total"])
             idle_delta = cpu_idle - int(self.previous["cpu_idle"])
             elapsed = monotonic_now - self.previous["monotonic"]
@@ -288,6 +300,7 @@ class Collector:
             "network_rx": network_rx,
             "network_tx": network_tx,
             "monotonic": monotonic_now,
+            "service_active": service_active,
         }
 
         players = game.get("players")
@@ -297,7 +310,7 @@ class Collector:
         return {
             "collected_at": now,
             "source_ok": 1,
-            "service_active": int(bool(service["active"])),
+            "service_active": int(service_active),
             "port_listening": int(bool(port["listening"])),
             "status_fresh": int(bool(game["statusFresh"])),
             "players": players,
@@ -327,25 +340,26 @@ def public_payload(store: StatusStore) -> dict[str, Any]:
     last_success_at = int(successful["collected_at"]) if successful else None
     stale = last_success_at is None or now - last_success_at > STALE_AFTER_SECONDS
     collector_ok = bool(latest and latest["source_ok"] and not stale)
-    available = bool(successful and not stale)
+    current = latest if collector_ok else None
+    available = current is not None
 
     online: bool | None = None
     if available:
         online = bool(
-            successful["service_active"]
-            and successful["port_listening"]
+            current["service_active"]
+            and current["port_listening"]
         )
 
     players_available = bool(
         available
-        and successful["status_fresh"]
-        and successful["players"] is not None
+        and current["status_fresh"]
+        and current["players"] is not None
     )
 
     def metric(name: str) -> float | None:
-        if not available or successful[name] is None:
+        if not available or current[name] is None:
             return None
-        return rounded(successful[name])
+        return rounded(current[name])
 
     return {
         "schemaVersion": SCHEMA_VERSION,
@@ -359,21 +373,21 @@ def public_payload(store: StatusStore) -> dict[str, Any]:
         "terraria": {
             "deployed": True,
             "online": online,
-            "players": int(successful["players"])
+            "players": int(current["players"])
             if players_available
             else None,
             "maxPlayers": 5,
             "address": "tr.7788oio.icu:18035",
-            "version": "tModLoader v2026.05.3.0",
+            "version": "tModLoader v2026.06.3.4",
             "world": "oio的冒险",
             "worldType": "大世界 · 大师 · 猩红",
             "modCount": 29,
-            "restarts": int(successful["restarts"]) if available else None,
+            "restarts": int(current["restarts"]) if available else None,
             "gameLatencyMs": metric("game_latency_ms"),
             "process": {
                 "cpuPercent": metric("process_cpu_percent"),
-                "memoryBytes": int(successful["process_memory_bytes"])
-                if available and successful["process_memory_bytes"] is not None
+                "memoryBytes": int(current["process_memory_bytes"])
+                if available and current["process_memory_bytes"] is not None
                 else None,
                 "memoryPercent": metric("process_memory_percent"),
             },

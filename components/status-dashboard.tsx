@@ -197,7 +197,8 @@ export function StatusDashboard() {
 
   const terraria = status?.terraria;
   const host = status?.host;
-  const dataUnavailable = !status || status.stale || requestFailed;
+  const dataUnavailable =
+    !status || status.stale || !status.collector.ok || requestFailed;
   const terrariaOnline = dataUnavailable ? null : terraria?.online ?? null;
   const playerCountAvailable =
     !dataUnavailable && terraria?.players != null;

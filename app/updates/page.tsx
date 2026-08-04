@@ -75,7 +75,33 @@ const updates = [
     subtitle: "模组已经确认，正式创建 Terraria 世界。",
     details: ["Terraria 服务端正式上线，进服办法详见 Terraria 页面"],
   },
+  {
+    date: "2026.08.02",
+    title: "更新 Terraria 服务端版本",
+    subtitle: "完成 tModLoader 服务端版本升级。",
+    details: ["从 2026.05.3.0 更新至 2026.06.3.4"],
+  },
+  {
+    date: "2026.08.03",
+    title: "更新 Terraria 模组列表",
+    subtitle: "调整伤害统计模组，并同步更新模组配置。",
+    details: ["移除 Damage Rank", "添加自制模组 DaybreakDamageTracker"],
+  },
+  {
+    date: "2026.08.04",
+    title: "更新 DaybreakDamageTracker",
+    subtitle: "正式上线 Steam 创意工坊，并完成版本升级。",
+    details: ["上线 Steam 创意工坊", "从 0.1.2 更新至 0.1.3"],
+  },
+  {
+    date: "2026.08.04",
+    title: "更新 Daybreak DamageTracker",
+    subtitle: "从 0.1.3 更新至 0.1.5。",
+    details: ["优化使用体验", "为后续开发扩展接口"],
+  },
 ];
+
+const updatesNewestFirst = [...updates].reverse();
 
 export default function UpdatesPage() {
   return (
@@ -93,7 +119,7 @@ export default function UpdatesPage() {
       </section>
 
       <section className="timeline page-shell">
-        {updates.map((update, updateIndex) => (
+        {updatesNewestFirst.map((update, updateIndex) => (
           <article className="timeline-item" key={`${update.date}-${update.title}`}>
             <div className="timeline-meta">
               <span>{update.date}</span>

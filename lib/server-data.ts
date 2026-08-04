@@ -45,9 +45,9 @@ export const terrariaMods: ModInfo[] = [
     "Boss 离开屏幕时显示方向指示，减少战斗中丢失目标的情况。",
   ),
   steamWorkshopMod(
-    "3423180893",
-    "Damage Rank",
-    "Boss 战结束后展示伤害排行榜，方便多人查看各自的输出表现。",
+    "3776927292",
+    "Daybreak DamageTracker",
+    "自制 Boss 伤害统计模组，记录多人战斗中的输出表现，方便团队在战后查看与复盘。",
   ),
   steamWorkshopMod(
     "2825151264",
