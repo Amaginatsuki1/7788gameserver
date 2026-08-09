@@ -5,6 +5,7 @@ const nav = [
   ["/minecraft", "Minecraft"],
   ["/status", "状态"],
   ["/updates", "更新"],
+  ["/mod-development", "帮我做 Mod"],
 ];
 
 export function SiteHeader() {

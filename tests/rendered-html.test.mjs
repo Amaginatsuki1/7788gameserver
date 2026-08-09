@@ -46,6 +46,7 @@ const publicRoutes = [
   ["/minecraft/join", /四项待办/],
   ["/status", /世界运行状态/],
   ["/updates", /每一次世界变化/],
+  ["/mod-development", /伤害追踪/],
 ];
 
 for (const [pathname, marker] of publicRoutes) {
@@ -67,28 +68,121 @@ test("updates page renders the document A/B/C hierarchy", async () => {
   assert.match(html, /Terraria 正式创建世界/);
   assert.match(html, /从 2026\.05\.3\.0 更新至 2026\.06\.3\.4/);
   assert.match(html, /移除 Damage Rank/);
-  assert.match(html, /添加自制模组 DaybreakDamageTracker/);
-  assert.match(html, /更新 DaybreakDamageTracker/);
+  assert.match(html, /添加自制模组 Daybreak DamageTracker/);
   assert.match(html, /上线 Steam 创意工坊/);
   assert.match(html, /从 0\.1\.2 更新至 0\.1\.3/);
   assert.match(html, /更新 Daybreak DamageTracker/);
   assert.match(html, /从 0\.1\.3 更新至 0\.1\.5/);
   assert.match(html, /优化使用体验/);
   assert.match(html, /为后续开发扩展接口/);
+  assert.match(html, /从 0\.1\.5 更新至 0\.1\.6/);
+  assert.match(html, /同时多 Boss 改为独立统计与即时结算/);
+  assert.match(html, /从 0\.1\.6 更新至 0\.1\.7/);
+  assert.match(html, /新增权威持续伤害统计/);
+  assert.doesNotMatch(html, /正式游戏服同步前仍需核验精确 Steam 发布包/);
   assert.match(html, /class="timeline-details"/);
   assert.doesNotMatch(html, />[abc]\s/);
 
-  const newestRecord = html.indexOf("从 0.1.3 更新至 0.1.5");
+  const newestRecord = html.indexOf("从 0.1.6 更新至 0.1.7");
+  const previousPublicRecord = html.indexOf("从 0.1.5 更新至 0.1.6");
+  const previousVersionRecord = html.indexOf("从 0.1.3 更新至 0.1.5");
   const workshopRecord = html.indexOf("上线 Steam 创意工坊");
-  const previousRecord = html.indexOf("添加自制模组 DaybreakDamageTracker");
+  const previousRecord = html.indexOf("添加自制模组 Daybreak DamageTracker");
   const versionRecord = html.indexOf("从 2026.05.3.0 更新至 2026.06.3.4");
   const worldCreatedRecord = html.indexOf("Terraria 正式创建世界");
   const oldestRecord = html.indexOf("服务器配置完成");
-  assert.ok(newestRecord < workshopRecord, "the 0.1.5 update should render first");
+  assert.ok(newestRecord < previousPublicRecord, "the 0.1.7 update should render first");
+  assert.ok(previousPublicRecord < previousVersionRecord, "the 0.1.6 update should follow 0.1.7");
+  assert.ok(previousVersionRecord < workshopRecord, "same-day updates should render newest first");
   assert.ok(workshopRecord < previousRecord, "same-day updates should render newest first");
   assert.ok(previousRecord < versionRecord, "older updates should render farther down");
   assert.ok(versionRecord < worldCreatedRecord, "older updates should render farther down");
   assert.ok(worldCreatedRecord < oldestRecord, "the oldest update should render last");
+});
+
+test("mod development page separates runtime logic from the published 0.1.7 implementation", async () => {
+  const response = await render("/mod-development");
+  const html = await response.text();
+  const explorerSource = await readFile(
+    new URL("../components/mod-architecture-explorer.tsx", import.meta.url),
+    "utf8",
+  );
+  const runtimeSource = await readFile(
+    new URL("../components/mod-runtime-flow.tsx", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(html, /Daybreak DamageTracker/);
+  assert.match(html, /伤害追踪/);
+  assert.match(html, /aria-label="Daybreak DamageTracker，伤害追踪"/);
+  assert.match(html, /有建议？欢迎！/);
+  assert.match(html, /请跳转 GitHub Issues \/ Steam 创意工坊讨论区/);
+  assert.match(html, /CURRENT VERSION/);
+  assert.match(html, /0\.1\.7/);
+  assert.doesNotMatch(html, /0\.1\.6/);
+  assert.doesNotMatch(html, /SERVER SYNC/);
+  assert.match(html, /战斗统计系统 · 可钻取架构总览/);
+  assert.match(html, /SERVER AUTHORITATIVE/);
+  assert.match(html, /Encounter FSM/);
+  assert.match(html, /运行逻辑/);
+  assert.match(html, /实现方式/);
+  assert.match(html, /从开始到结算的路径/);
+  assert.match(html, /展开执行边界、状态约束、网络模型、接口依据与真实源码/);
+  assert.match(html, /复现，验证，修复/);
+  assert.match(html, /两条伤害路径，汇入同一套账本/);
+  assert.doesNotMatch(html, /daybreak-damage-tracker-logic\.svg/);
+  assert.match(explorerSource, /采集与归因层/);
+  assert.match(explorerSource, /持续伤害计量与归因/);
+  assert.match(explorerSource, /Boss 语义适配层/);
+  assert.match(explorerSource, /遭遇协调器与状态机/);
+  assert.match(explorerSource, /分层账本与身份模型/);
+  assert.match(explorerSource, /生命周期裁决策略/);
+  assert.match(explorerSource, /结果投影与网络交付/);
+  assert.match(explorerSource, /CAPTURE \/ DIRECT HIT \+ DAMAGE OVER TIME/);
+  assert.match(explorerSource, /AGGREGATION \/ RESOLUTION/);
+  assert.match(explorerSource, /PublicResultSnapshot/);
+  assert.match(explorerSource, /接口与实现依据/);
+  assert.match(explorerSource, /docs\.tmodloader\.net\/docs\/stable\/class_mod_system\.html/);
+  assert.match(explorerSource, /github\.com\/JavidPack\/BossChecklist/);
+  assert.match(explorerSource, /highlightCSharpLine/);
+  assert.match(explorerSource, /syntax-keyword/);
+  assert.match(explorerSource, /lineStart/);
+  assert.match(explorerSource, /HookStrikeNpc/);
+  assert.match(explorerSource, /HookUpdateNpcBuffApplyDots/);
+  assert.match(explorerSource, /WeightedDamageAccumulator\.Allocate/);
+  assert.match(explorerSource, /PrivateSourceAttributionPolicy/);
+  assert.match(explorerSource, /ScanActiveBosses/);
+  assert.match(explorerSource, /PostUpdateWorld/);
+  assert.match(explorerSource, /RecordPlayerDamage/);
+  assert.match(explorerSource, /ResolveInactiveBoundary/);
+  assert.match(explorerSource, /SendResultToConfiguredRecipients/);
+  assert.match(explorerSource, /b258635e4f6b2146deec98b2fc7df4f70d0e3577/);
+  assert.match(explorerSource, /mod-architecture-code-stack/);
+  assert.doesNotMatch(explorerSource, /activeCodeIndex/);
+  assert.match(runtimeSource, /实际生命损失/);
+  assert.match(runtimeSource, /Boss key 完整缺席一次/);
+  assert.match(html, /当前待做事项/);
+  assert.match(html, /回归测试/);
+  assert.match(html, /找bug要记录复现办法/);
+  assert.match(html, /GitHub Issues/);
+  assert.match(html, /Steam 讨论区/);
+  assert.match(html, /Daybreak-DamageTracker\/issues/);
+  assert.match(html, /filedetails\/discussions\/3776927292/);
+  assert.doesNotMatch(html, /DEVELOPMENT APPROACH/);
+  assert.doesNotMatch(html, /CONTRIBUTE/);
+  assert.doesNotMatch(html, /从 Boss 识别开始/);
+  assert.ok(
+    html.indexOf("CURRENT VERSION") < html.indexOf("RUNNING LOGIC"),
+    "the version section should render before the runtime logic",
+  );
+  assert.ok(
+    html.indexOf("RUNNING LOGIC") < html.indexOf("TECHNICAL IMPLEMENTATION"),
+    "the runtime logic should render before the technical implementation",
+  );
+  assert.ok(
+    html.indexOf("TECHNICAL IMPLEMENTATION") < html.indexOf("当前待做事项"),
+    "the technical implementation should render before the todo list",
+  );
 });
 
 test("status dashboard uses the exact public API endpoint", async () => {

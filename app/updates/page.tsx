@@ -85,11 +85,11 @@ const updates = [
     date: "2026.08.03",
     title: "更新 Terraria 模组列表",
     subtitle: "调整伤害统计模组，并同步更新模组配置。",
-    details: ["移除 Damage Rank", "添加自制模组 DaybreakDamageTracker"],
+    details: ["移除 Damage Rank", "添加自制模组 Daybreak DamageTracker"],
   },
   {
     date: "2026.08.04",
-    title: "更新 DaybreakDamageTracker",
+    title: "更新 Daybreak DamageTracker",
     subtitle: "正式上线 Steam 创意工坊，并完成版本升级。",
     details: ["上线 Steam 创意工坊", "从 0.1.2 更新至 0.1.3"],
   },
@@ -98,6 +98,26 @@ const updates = [
     title: "更新 Daybreak DamageTracker",
     subtitle: "从 0.1.3 更新至 0.1.5。",
     details: ["优化使用体验", "为后续开发扩展接口"],
+  },
+  {
+    date: "2026.08.07",
+    title: "更新 Daybreak DamageTracker",
+    subtitle: "从 0.1.5 更新至 0.1.6。",
+    details: [
+      "修复旧战斗串入后续 Boss 与断线重连重复排行",
+      "同时多 Boss 改为独立统计与即时结算",
+      "新增 1–10 场历史记录与本地面板偏好",
+    ],
+  },
+  {
+    date: "2026.08.10",
+    title: "更新 Daybreak DamageTracker",
+    subtitle: "从 0.1.6 更新至 0.1.7。",
+    details: [
+      "新增权威持续伤害统计，并将可确认的减益与弹幕来源归入对应玩家",
+      "修复普通 Boss 未触发 OnKill 便消失时无法结算的问题",
+      "同一 Boss 再次召唤使用独立账本、历史与面板身份",
+    ],
   },
 ];
 

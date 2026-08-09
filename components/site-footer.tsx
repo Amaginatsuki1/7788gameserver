@@ -16,6 +16,7 @@ export function SiteFooter() {
           <Link href="/minecraft">Minecraft</Link>
           <Link href="/status">状态</Link>
           <Link href="/updates">更新记录</Link>
+          <Link href="/mod-development">帮我做 Mod</Link>
         </div>
         <div className="footer-meta">
           <span>7788oio.icu</span>

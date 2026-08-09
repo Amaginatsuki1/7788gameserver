@@ -47,7 +47,7 @@ export const terrariaMods: ModInfo[] = [
   steamWorkshopMod(
     "3776927292",
     "Daybreak DamageTracker",
-    "自制 Boss 伤害统计模组，记录多人战斗中的输出表现，方便团队在战后查看与复盘。",
+    "自制 Boss 伤害统计模组。0.1.7 已公开，支持直接伤害与持续伤害、每只 Boss 独立结算、本人来源树和历史记录。",
   ),
   steamWorkshopMod(
     "2825151264",
