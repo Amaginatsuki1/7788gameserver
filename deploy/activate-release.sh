@@ -6,7 +6,7 @@ release_name="${2:-$(date +%Y%m%d-%H%M%S)-reinstall}"
 case "$release_name" in ''|*[!A-Za-z0-9_-]*) echo "Invalid release name" >&2; exit 2;; esac
 site_root="${SITE_ROOT:-/srv/7788}"
 release="$site_root/releases/$release_name"
-previous="$(readlink -f "$site_root/current" 2>/dev/null || true)"
+previous="$(readlink -e "$site_root/current" 2>/dev/null || true)"
 # Never overwrite a retained release.
 mkdir -p "$site_root/releases"
 mkdir "$release"

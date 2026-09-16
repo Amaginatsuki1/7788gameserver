@@ -193,7 +193,7 @@ export function ResourceTrendChart({
         role="img"
         aria-label={
           hasData
-            ? `${label} ${period}趋势，当前 ${current}%，平均 ${average}%，峰值 ${peak}%，${health.label}`
+            ? `${label} ${period}趋势，当前 ${current === null ? "未知" : `${current}%`}，${summary ? "平均" : "区间平均"} ${average === null ? "未知" : `${average}%`}，峰值 ${peak === null ? "未知" : `${peak}%`}，${health.label}`
             : `${label} ${period}趋势暂不可用`
         }
       >

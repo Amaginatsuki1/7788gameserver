@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { measureEndpoint } from "@/lib/latency-client";
 
 export type LatencyService = {
   id: string;
@@ -50,39 +51,6 @@ function probePresentation(probe: ProbeState, available: boolean) {
   return { level: "neutral", label: "待测速" };
 }
 
-async function takeSample(endpoint: string, sample: number) {
-  const url = new URL(endpoint, window.location.href);
-  url.searchParams.set("probe", `${Date.now()}-${sample}`);
-
-  const controller = new AbortController();
-  const timeoutId = window.setTimeout(() => controller.abort(), 4000);
-  const startedAt = performance.now();
-
-  try {
-    const response = await fetch(url, {
-      cache: "no-store",
-      mode: "cors",
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error(`Probe returned ${response.status}`);
-    await response.text();
-    return performance.now() - startedAt;
-  } finally {
-    window.clearTimeout(timeoutId);
-  }
-}
-
-async function measureEndpoint(endpoint: string) {
-  const samples = [];
-
-  for (let index = 0; index < 5; index += 1) {
-    samples.push(await takeSample(endpoint, index));
-  }
-
-  samples.sort((a, b) => a - b);
-  return Math.max(1, Math.round(samples[2]));
-}
-
 const initialServiceState = (): ServiceProbeState => ({
   game: { status: "idle" },
   website: { status: "idle" },
@@ -99,6 +67,15 @@ export function LatencyTester({
     ),
   );
 
+  const requests = useRef(new Map<string, AbortController>());
+  useEffect(() => {
+    const pending = requests.current;
+    return () => {
+      for (const controller of pending.values()) controller.abort();
+      pending.clear();
+    };
+  }, []);
+
   const updateProbe = (
     serviceId: string,
     target: keyof ServiceProbeState,
@@ -114,7 +91,9 @@ export function LatencyTester({
   };
 
   const runServiceProbe = async (service: LatencyService) => {
-    if (!service.available || !service.gameEndpoint) return;
+    if (!service.available || !service.gameEndpoint || requests.current.has(service.id)) return;
+    const controller = new AbortController();
+    requests.current.set(service.id, controller);
 
     setProbes((current) => ({
       ...current,
@@ -124,18 +103,22 @@ export function LatencyTester({
       },
     }));
 
-    await Promise.all([
-      measureEndpoint(service.gameEndpoint)
-        .then((latency) =>
-          updateProbe(service.id, "game", { status: "done", latency }),
-        )
-        .catch(() => updateProbe(service.id, "game", { status: "error" })),
-      measureEndpoint(service.websiteEndpoint)
-        .then((latency) =>
-          updateProbe(service.id, "website", { status: "done", latency }),
-        )
-        .catch(() => updateProbe(service.id, "website", { status: "error" })),
-    ]);
+    const measure = async (target: keyof ServiceProbeState, endpoint: string) => {
+      try {
+        const latency = await measureEndpoint(endpoint, controller.signal, window.location.href);
+        if (!controller.signal.aborted) updateProbe(service.id, target, { status: "done", latency });
+      } catch {
+        if (!controller.signal.aborted) updateProbe(service.id, target, { status: "error" });
+      }
+    };
+    try {
+      await Promise.all([
+        measure("game", service.gameEndpoint),
+        measure("website", service.websiteEndpoint),
+      ]);
+    } finally {
+      if (requests.current.get(service.id) === controller) requests.current.delete(service.id);
+    }
   };
 
   return (

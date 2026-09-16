@@ -206,11 +206,11 @@ export function StatusDashboard() {
           </div>
           <dl className="service-details">
             <div><dt>公开地址</dt><dd>{terraria?.address ?? "tr.7788oio.icu:18035"}</dd></div>
-            <div><dt>版本</dt><dd>{terraria?.version ?? "读取中"}</dd></div>
-            <div><dt>世界</dt><dd>{terraria?.world ?? "读取中"}</dd></div>
+            <div><dt>版本</dt><dd>{terraria?.version ?? (requestFailed ? "未知" : "读取中")}</dd></div>
+            <div><dt>世界</dt><dd>{terraria?.world ?? (requestFailed ? "未知" : "读取中")}</dd></div>
             <div>
               <dt title="按雨云每日 06:29 自动备份任务显示">最近备份</dt>
-              <dd>{formatLatestScheduledBackup(status?.generatedAt)}</dd>
+              <dd>{!status && requestFailed ? "未知" : formatLatestScheduledBackup(status?.generatedAt)}</dd>
             </div>
           </dl>
           <div className="service-latency-block">

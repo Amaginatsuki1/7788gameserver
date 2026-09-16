@@ -1158,8 +1158,6 @@ button { font: inherit; }
 .status-hero { padding-block: 156px 56px; display: flex; align-items: end; justify-content: space-between; gap: 48px; }
 .status-hero h1 { margin-block: 18px; font-size: clamp(50px, 6.2vw, 70px); }
 .status-hero > div:first-child > p { max-width: 660px; margin: 0; color: var(--ash); font-size: 17px; }
-.demo-banner { min-width: 250px; padding: 22px; background: var(--card); border-radius: 12px; }
-.demo-banner p { margin: 11px 0 0; color: var(--ash); font-size: 12px; }
 .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-bottom: 20px; }
 .service-panel {
   min-height: 620px;
@@ -1699,8 +1697,7 @@ button { font: inherit; }
   }
 }
 
-.mod-dev-version-label > span,
-.logic-diagram-kicker {
+.mod-dev-version-label > span {
   color: var(--ash);
   font: 400 10px/1.5 var(--font-mono);
   letter-spacing: .08em;
@@ -1876,75 +1873,6 @@ button { font: inherit; }
   padding: 24px 30px;
 }
 .mod-runtime-rule p { max-width: 850px; color: var(--ivory); }
-.logic-diagram {
-  margin: 0;
-  padding: 20px;
-  background: var(--card);
-  border-radius: 12px;
-}
-.logic-diagram-toolbar {
-  min-height: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 28px;
-  padding: 4px 4px 20px;
-}
-.logic-diagram-toolbar > div:first-child {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.logic-diagram-toolbar strong {
-  color: var(--ivory);
-  font-size: 18px;
-  font-weight: 480;
-}
-.logic-diagram-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.logic-diagram-actions button,
-.logic-diagram-actions a,
-.logic-diagram-actions > span {
-  min-height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 12px;
-  color: var(--ivory);
-  background: var(--interactive);
-  border: 1px solid var(--hairline);
-  border-radius: 32px;
-  font-size: 12px;
-}
-.logic-diagram-actions button { cursor: pointer; }
-.logic-diagram-actions button:disabled { cursor: default; opacity: .35; }
-.logic-diagram-actions > span {
-  min-width: 60px;
-  color: var(--ash);
-  font-family: var(--font-mono);
-}
-.logic-diagram-actions button:hover:not(:disabled),
-.logic-diagram-actions a:hover { border-color: var(--border); }
-.logic-diagram-viewport {
-  height: min(78svh, 820px);
-  min-height: 560px;
-  overflow: auto;
-  background: #141414;
-  border: 1px solid var(--hairline);
-  border-radius: 8px;
-  overscroll-behavior: contain;
-  scrollbar-color: var(--border) #141414;
-}
-.logic-diagram-viewport img {
-  max-width: none;
-  height: auto;
-  display: block;
-  margin-inline: auto;
-  user-select: none;
-}
 .mod-architecture-explorer {
   overflow: hidden;
   background: var(--card);
@@ -2643,7 +2571,6 @@ button { font: inherit; }
   .principles-grid article { min-height: 240px; }
   .principles-grid h3 { margin-top: 48px; }
   .status-hero { padding-block: 156px 42px; flex-direction: column; align-items: flex-start; }
-  .demo-banner { width: 100%; }
   .status-grid { grid-template-columns: 1fr; }
   .game-resource-grid { grid-template-columns: 1fr; }
   .latency-grid { grid-template-columns: 1fr; }
@@ -2679,11 +2606,6 @@ button { font: inherit; }
   .mod-runtime-branches article:nth-child(-n + 2) { border-right: 0; border-bottom: 1px solid var(--hairline); }
   .mod-runtime-branches article:last-child { border-bottom: 0; }
   .mod-runtime-rule { grid-template-columns: 1fr; gap: 10px; padding: 22px; }
-  .logic-diagram { padding: 12px; }
-  .logic-diagram-toolbar { align-items: flex-start; flex-direction: column; }
-  .logic-diagram-actions { width: 100%; flex-wrap: wrap; }
-  .logic-diagram-actions a { margin-left: auto; }
-  .logic-diagram-viewport { height: 68svh; min-height: 460px; }
   .mod-architecture-toolbar {
     min-height: 0;
     align-items: flex-start;
