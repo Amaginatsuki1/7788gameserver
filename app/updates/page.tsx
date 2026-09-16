@@ -160,7 +160,7 @@ export default function UpdatesPage() {
 
       <section className="timeline page-shell">
         {updatesNewestFirst.map((update, updateIndex) => (
-          <article className="timeline-item" key={`${update.date}-${update.title}`}>
+          <article className="timeline-item" key={`${update.date}-${update.title}-${update.subtitle}`}>
             <div className="timeline-meta">
               <span>{update.date}</span>
               <strong>RECORD / {String(updateIndex + 1).padStart(2, "0")}</strong>
