@@ -68,7 +68,7 @@ export function JoinGuidePage({
 }: JoinGuidePageProps) {
   return (
     <>
-      <section className="article-hero page-shell">
+      <section className="article-hero guide-hero page-shell">
         <div className="breadcrumbs">
           <Link href={gameHref}>{gameName}</Link>
           <span>/</span>

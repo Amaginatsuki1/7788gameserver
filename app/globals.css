@@ -210,8 +210,8 @@ button { font: inherit; }
   align-items: center;
   gap: 10px;
   color: var(--ash);
-  font: 400 11px/1.2 var(--font-mono);
-  letter-spacing: 0.11em;
+  font: 400 12px/1.2 var(--font-mono);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 .eyebrow-dot,
@@ -245,7 +245,7 @@ button { font: inherit; }
   border: 1px solid var(--ivory);
 }
 .button-secondary:hover, .button-light:hover { background: var(--interactive); }
-.micro-note { margin-top: 26px; color: rgba(237,237,243,.72); font: 400 11px/1.5 var(--font-mono); }
+.micro-note { margin-top: 26px; color: rgba(237,237,243,.72); font: 400 12px/1.5 var(--font-mono); }
 
 .hero-worldbar {
   position: absolute;
@@ -262,12 +262,12 @@ button { font: inherit; }
 .worldbar-intro { flex-direction: column; justify-content: center; align-items: flex-start; }
 .worldbar-intro strong { margin-top: 7px; color: var(--ivory); font-size: 18px; font-weight: 480; }
 .worldbar-item { gap: 18px; border-left: 1px solid var(--hairline); }
-.worldbar-item > span { color: var(--ash); font: 400 11px/1 var(--font-mono); }
+.worldbar-item > span { color: var(--ash); font: 400 12px/1 var(--font-mono); }
 .worldbar-item > div { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .worldbar-item strong { color: var(--ivory); font-size: 14px; font-weight: 480; }
-.worldbar-item small { color: var(--ash); font-size: 11px; }
+.worldbar-item small { color: var(--ash); font-size: 12px; }
 
-.mono-label { color: var(--ash); font: 400 10px/1.5 var(--font-mono); letter-spacing: 0.09em; }
+.mono-label { color: var(--ash); font: 400 12px/1.5 var(--font-mono); letter-spacing: 0.05em; }
 .mono-label.light { color: var(--ash); }
 .status-badge {
   display: inline-flex;
@@ -1411,7 +1411,7 @@ button { font: inherit; }
 }
 .monitor-panel { padding: 32px; background: var(--card); border-radius: 12px; }
 .monitor-heading h2 { margin: 8px 0 0; color: var(--ivory); font-family: var(--font-display); font-size: 30px; font-weight: 480; }
-.refresh-note { color: var(--ash); font: 400 10px/1.5 var(--font-mono); }
+.refresh-note { color: var(--ash); font: 400 12px/1.5 var(--font-mono); }
 .resource-status-legend {
   display: flex;
   justify-content: flex-end;
@@ -2502,8 +2502,7 @@ button { font: inherit; }
   .site-nav::-webkit-scrollbar { display: none; }
   .site-nav { gap: 0; }
   .site-nav a { flex: none; padding: 7px 9px; font-size: 13px; }
-  .header-status { padding: 8px 12px; }
-  .header-status span:last-child { display: none; }
+  .header-status { display: none; }
   .guide-step { scroll-margin-top: 136px; }
   .hero { min-height: 880px; padding: 150px 0 320px; background-position: 60% center; }
   .dual-world-hero { --spotlight-radius: 155px; }
@@ -2546,6 +2545,10 @@ button { font: inherit; }
   .sub-hero { min-height: auto; padding-block: 160px 76px; }
   .article-hero { padding-block: 150px 72px; }
   .article-hero-grid { margin-top: 58px; }
+  .guide-hero { padding-block: 136px 40px; }
+  .guide-hero .article-hero-grid { margin-top: 32px; gap: 32px; }
+  .guide-hero .article-intro > p { margin-bottom: 20px; }
+  .guide-hero + .guide-layout { gap: 32px; }
   .guide-layout { grid-template-columns: 1fr; gap: 48px; }
   .guide-aside { position: static; }
   .guide-step,
