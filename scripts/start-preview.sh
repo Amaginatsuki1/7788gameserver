@@ -23,7 +23,7 @@ if [ -z "$node_bin" ]; then
     temp=$(mktemp -d "$root/.preview/download.XXXXXX")
     trap 'rm -f "$temp/archive.tar.gz"; rmdir "$temp" 2>/dev/null || true' EXIT HUP INT TERM
     printf 'Preparing portable Node.js %s from nodejs.org (no sudo needed)...\n' "$version"
-    curl --fail --location --retry 2 --connect-timeout 15 --max-time 180 "https://nodejs.org/dist/v$version/$archive_name" -o "$temp/archive.tar.gz"
+    curl --fail --location --progress-bar --retry 2 --connect-timeout 15 --max-time 180 "https://nodejs.org/dist/v$version/$archive_name" -o "$temp/archive.tar.gz"
     if command -v sha256sum >/dev/null 2>&1; then actual=$(sha256sum "$temp/archive.tar.gz" | awk '{print $1}');
     else actual=$(shasum -a 256 "$temp/archive.tar.gz" | awk '{print $1}'); fi
     [ "$actual" = "$expected" ] || { echo 'Node.js checksum mismatch; download was not executed.' >&2; exit 1; }
@@ -35,6 +35,7 @@ if [ -z "$node_bin" ]; then
     trap - EXIT HUP INT TERM
   fi
 fi
+printf '[1/3] Node.js is ready; using the local runtime.\n'
 PATH="$(dirname "$node_bin"):$PATH"
 export PATH
 exec "$node_bin" "$root/scripts/preview.mjs" "$@"

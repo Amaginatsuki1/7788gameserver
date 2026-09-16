@@ -11,8 +11,38 @@ export const supportsNode = (version) => {
   const [major, minor] = version.split(".").map(Number);
   return major > 22 || (major === 22 && minor >= 13);
 };
+const stableJson = value => JSON.stringify(value, (_key, item) =>
+  item && typeof item === "object" && !Array.isArray(item)
+    ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b))) : item);
 export function dependencyFingerprint(lock, manifest, platform = process.platform, arch = process.arch, node = process.versions.node) {
-  return createHash("sha256").update([lock, manifest, platform, arch, node.split(".")[0]].join("\0")).digest("hex");
+  const pkg = JSON.parse(manifest);
+  const installFields = ["dependencies", "devDependencies", "optionalDependencies", "peerDependencies", "peerDependenciesMeta", "overrides", "workspaces", "engines", "os", "cpu", "type", "packageManager"];
+  const install = Object.fromEntries(installFields.filter(key => pkg[key] !== undefined).map(key => [key, pkg[key]]));
+  const lifecycle = ["preinstall", "install", "postinstall", "prepublish", "preprepare", "prepare", "postprepare"];
+  install.scripts = Object.fromEntries(lifecycle.filter(key => pkg.scripts?.[key] !== undefined).map(key => [key, pkg.scripts[key]]));
+  return createHash("sha256").update([stableJson(JSON.parse(lock)), stableJson(install), platform, arch, node.split(".")[0]].join("\0")).digest("hex");
+}
+export function cacheMatches(stamp, lock, manifest, platform = process.platform, arch = process.arch, node = process.versions.node) {
+  if (!stamp?.fingerprint) return false;
+  if (stamp.fingerprint === dependencyFingerprint(lock, manifest, platform, arch, node)) return true;
+  // Adopt the previous marker without reinstalling an already matching environment.
+  const legacy = createHash("sha256").update([lock, manifest, platform, arch, node.split(".")[0]].join("\0")).digest("hex");
+  return stamp.fingerprint === legacy;
+}
+function activity(label) {
+  const started = Date.now();
+  let frame = 0;
+  console.log(`${label}……`);
+  const timer = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - started) / 1000);
+    if (process.stdout.isTTY) {
+      const offset = frame++ % 12;
+      const bar = " ".repeat(offset) + "====" + " ".repeat(11 - offset);
+      process.stdout.write(`\r\x1b[2K${label} [${bar}] 已用 ${elapsed} 秒`);
+    } else console.log(`${label} · 已用 ${elapsed} 秒`);
+  }, process.stdout.isTTY ? 250 : 5000);
+  timer.unref();
+  return () => { clearInterval(timer); if (process.stdout.isTTY) process.stdout.write("\r\x1b[2K"); };
 }
 export async function availablePort(start = 3000, count = 21) {
   for (let port = start; port < start + count; port++) {
@@ -100,12 +130,14 @@ export async function main(args = process.argv.slice(2)) {
   let server;
   let installer;
   let stopping = false;
+  let stopActivity = () => {};
   const release = async () => {
     if ((await readState(lockFile))?.token === state.token) await rm(lockFile, { force: true });
   };
   const shutdown = async () => {
     if (stopping) return;
     stopping = true;
+    stopActivity();
     const forceExit = setTimeout(() => process.exit(0), 5000);
     forceExit.unref();
     installer?.kill();
@@ -114,16 +146,21 @@ export async function main(args = process.argv.slice(2)) {
   process.once("SIGINT", shutdown);
   process.once("SIGTERM", shutdown);
   try {
-    console.log("\n7788 本地预览 · 首次准备需要联网，完成后会自动打开浏览器。\n");
+    console.log("\n7788 本地预览\n");
+    console.log(`[1/3] Node.js ${process.versions.node} 已就绪`);
     const [lockContent, manifest] = await Promise.all([
       readFile(path.join(projectRoot, "package-lock.json"), "utf8"),
       readFile(path.join(projectRoot, "package.json"), "utf8"),
     ]);
     const fingerprint = dependencyFingerprint(lockContent, manifest);
     const stamp = path.join(projectRoot, "node_modules/.7788-preview.json");
-    if ((await readState(stamp))?.fingerprint !== fingerprint || !existsSync(path.join(projectRoot, "node_modules/vite/package.json"))) {
+    const cached = await readState(stamp);
+    const entryPresent = existsSync(path.join(projectRoot, "node_modules/vite/package.json"));
+    if (!cacheMatches(cached, lockContent, manifest) || !entryPresent) {
       await rm(stamp, { force: true });
-      console.log("正在安装或更新锁定版本的依赖，请保持窗口打开……");
+      const reason = !entryPresent ? "依赖文件缺失" : !cached ? "没有完成安装的记录" : "依赖配置或运行环境发生变化";
+      console.log(`[2/3] 需要安装：${reason}。已有 npm 下载缓存会优先复用。`);
+      stopActivity = activity("[2/3] 正在下载／解压／安装依赖");
       await new Promise((resolve, reject) => {
         installer = spawn(process.execPath, [npmCli(), "ci", "--include=dev", "--no-audit", "--no-fund"], {
           cwd: projectRoot, stdio: "inherit", windowsHide: true,
@@ -133,13 +170,19 @@ export async function main(args = process.argv.slice(2)) {
         installer.once("exit", code => code === 0 ? resolve() : reject(new Error("依赖安装失败。请检查网络、磁盘空间与上方 npm 提示，再次启动会重新安装。")));
       });
       installer = null;
-      await writeFile(stamp, JSON.stringify({ fingerprint }));
+      stopActivity();
+      console.log("[2/3] 依赖安装完成");
+      await writeFile(stamp, JSON.stringify({ fingerprint, format: 2 }));
+    } else {
+      if (cached.fingerprint !== fingerprint) await writeFile(stamp, JSON.stringify({ fingerprint, format: 2 }));
+      console.log("[2/3] 依赖缓存有效，跳过安装（无需下载）");
     }
     if (args.includes("--prepare-only")) {
       console.log("PREVIEW_PREPARED 环境与依赖已就绪。");
       await release();
       return;
     }
+    stopActivity = activity("[3/3] 正在启动本地服务");
     process.env.NODE_ENV = "development";
     process.env.LOCAL_PREVIEW = "1";
     const { createServer, loadEnv } = await import("vite");
@@ -163,16 +206,21 @@ export async function main(args = process.argv.slice(2)) {
     });
     await server.listen();
     const url = `http://127.0.0.1:${state.port}/`;
-    console.log(`正在编译首页：${url}`);
+    stopActivity();
+    console.log(`预览地址：${url}`);
+    stopActivity = activity("[3/3] 正在编译首页");
     const response = await fetch(url, { signal: AbortSignal.timeout(120_000) });
     if (!response.ok || !response.headers.get("content-type")?.includes("text/html") || !(await response.text()).includes("7788")) {
       throw new Error("首页未能正确编译，请检查上方错误提示。");
     }
     await writeFile(lockFile, JSON.stringify(state));
+    stopActivity();
+    console.log(`[3/3] 预览已就绪`);
     console.log(`PREVIEW_READY ${url}`);
     console.log("修改源码后页面会自动更新。按 Ctrl+C 或关闭此窗口即可停止。\n");
     if (shouldOpen) openBrowser(url);
   } catch (error) {
+    stopActivity();
     await server?.close();
     await release();
     throw error;
