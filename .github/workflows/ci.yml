@@ -25,3 +25,33 @@ jobs:
       - run: python -m unittest discover -s tests -p 'test_deploy_scripts.py'
       - run: npm run build:static
       - run: npm audit --audit-level=high
+
+  preview:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Extract source without Git metadata
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/7788 preview"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/7788 preview"
+      - name: Prepare portable Node and dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        working-directory: ${{ runner.temp }}/7788 preview
+        run: ./scripts/start-preview.ps1 -UseBundledNode -NoBrowser -PrepareOnly
+      - name: Prepare portable Node and dependencies (macOS/Linux)
+        if: runner.os != 'Windows'
+        working-directory: ${{ runner.temp }}/7788 preview
+        run: PREVIEW_USE_BUNDLED_NODE=1 sh scripts/start-preview.sh --no-open --prepare-only
+      - name: Verify preview in an extracted-source directory
+        working-directory: ${{ runner.temp }}/7788 preview
+        run: node scripts/test-preview.mjs

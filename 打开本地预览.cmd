@@ -1,13 +1,13 @@
 @echo off
 setlocal
-cd /d "%~dp0"
-
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\start-preview.ps1"
-
-if errorlevel 1 (
+chcp 65001 >nul
+pushd "%~dp0" || exit /b 1
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\start-preview.ps1" %*
+set "previewExit=%ERRORLEVEL%"
+if not "%previewExit%"=="0" (
   echo.
-  echo Failed to start the local preview. See the message above.
+  echo Preview stopped with an error. See the message above.
   pause
 )
-
-endlocal
+popd
+exit /b %previewExit%

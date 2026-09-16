@@ -6,16 +6,36 @@ Terraria 与 Minecraft 私人游戏服务器的公开入口，提供世界介绍
 
 Terraria 内容已配置；Minecraft 保留完整页面，具体版本、玩法、地址和模组仍待确定。状态页通过独立 Python/SQLite 后端读取真实匿名数据；连接失败、数据过期或结构不正确时显示未知。
 
-## 本地开发
+## 一键本地预览
 
-需要 Node.js 22.13+ 和 npm。运行监控测试另需 Python 3.10+。
+下载本仓库 ZIP 并**完整解压**到可写目录，然后启动：
+
+| 系统 | 入口 |
+| --- | --- |
+| Windows | 双击 `打开本地预览.cmd` |
+| macOS | 双击 `打开本地预览.command`；如系统阻止执行，可在项目目录的终端运行 `sh scripts/start-preview.sh` |
+| Linux | 在项目目录运行 `sh scripts/start-preview.sh` |
+
+不需要预先安装 Node.js、npm、Git 或 Python。缺少合适的 Node.js 时，启动器会从 [Node.js 官方发布目录](https://nodejs.org/dist/v24.16.0/)下载免安装版本，使用仓库固定的 SHA-256 校验后放到 `.preview/`，不修改系统 PATH、不需要管理员权限。已有 Node.js 22.13+ 和 npm 时优先复用。
+
+首次启动需要联网访问 `nodejs.org` 和 npm registry，下载环境与依赖可能需要几分钟，请保持窗口打开；再次启动会复用缓存。锁文件、系统、架构或 Node 主版本变化时会自动重新安装依赖。支持常见 x64/ARM64 macOS 和 glibc Linux；Windows 使用 x64 运行时，ARM Windows 需要系统的 x64 兼容支持。老旧系统、Alpine/musl、受限网络或公司执行策略可能需要自行准备兼容环境。
+
+预览就绪后自动打开浏览器，默认地址 `http://127.0.0.1:3000/`；端口被其他程序占用时自动选择 3001–3020。重复启动会识别并打开本项目的现有预览。服务仅监听本机，修改源码会自动刷新；按 **Ctrl+C** 或关闭启动窗口停止。无监控后端时显示未知，不需要配置云服务账户。
+
+失败时窗口会保留错误提示，检查网络、目录写入权限和磁盘空间后重新启动即可。不需要手动修改源码或锁文件。不要从 ZIP 预览窗口中直接运行入口，不要分发自己的 `node_modules/`、`.preview/`、密钥或本地配置。
+
+## 手动开发与启动参数
+
+已安装 Node.js 时可以直接运行 `npm run preview`，它也会自动准备依赖。其他可选命令：
 
 ```sh
+npm run preview -- --no-open       # 启动但不打开浏览器
+npm run preview -- --prepare-only  # 只准备环境依赖
 npm ci
-npm run dev
+npm run dev                       # 原有 vinext / Cloudflare 开发入口
 ```
 
-默认访问 `http://localhost:3000`。Windows 也可双击 `打开本地预览.cmd`。开发服务器仅用于本地开发；私钥、密码及实际 SSH 配置应放在项目目录之外。
+Windows 强制验证免安装环境：`powershell -NoProfile -ExecutionPolicy Bypass -File scripts/start-preview.ps1 -UseBundledNode -PrepareOnly`。macOS/Linux 对应 `PREVIEW_USE_BUNDLED_NODE=1 sh scripts/start-preview.sh --prepare-only`。普通预览不需要 Python；仅监控后端测试需要 Python 3.10+。
 
 ## 构建与验证
 

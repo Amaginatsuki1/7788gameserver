@@ -13,7 +13,8 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "test:backend": "python -m unittest discover -s monitoring-backend -p test_*.py",
-    "check:public": "node scripts/check-public-source.mjs"
+    "check:public": "node scripts/check-public-source.mjs",
+    "preview": "node scripts/preview.mjs"
   },
   "dependencies": {
     "next": "16.3.5",

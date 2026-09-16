@@ -7,6 +7,9 @@ const localBindingConfig = {
 };
 
 export default defineConfig(async () => {
+  // Local preview needs no Cloudflare account, bindings, or workerd service.
+  if (process.env.LOCAL_PREVIEW === "1") return { plugins: [vinext()] };
+
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= "false";
@@ -17,6 +20,7 @@ export default defineConfig(async () => {
   const { cloudflare } = await import("@cloudflare/vite-plugin");
 
   return {
+    server: { watch: { ignored: ["**/.preview/**"] } },
     plugins: [
       vinext(),
       cloudflare({

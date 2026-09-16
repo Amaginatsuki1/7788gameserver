@@ -66,3 +66,6 @@ next-env.d.ts
 /.codex/
 /.agents/
 /local-only/
+
+# Local preview runtime and launch state
+/.preview/

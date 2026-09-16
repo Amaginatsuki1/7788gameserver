@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("..", import.meta.url));
 const paths = [...new Set(execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: root, encoding: "utf8" }).split("\0").filter(Boolean))];
-const forbidden = /(^|\/)(?:AGENTS\.md|PROJECT_HANDOFF\.md|password\.txt|hk_known_hosts_current|\.openai|\.codex|\.agents|local-only|outputs|node_modules)(?:$|\/)|(?:\.pem|\.key|\.p12|\.pfx|\.local)$|^docs\/(?:HISTORY\.md|MONITORING_RUNBOOK\.md|archive\/)|(^|\/)\.env(?!\.example$)/i;
+const forbidden = /(^|\/)(?:AGENTS\.md|PROJECT_HANDOFF\.md|password\.txt|hk_known_hosts_current|\.openai|\.codex|\.agents|local-only|outputs|node_modules|\.preview)(?:$|\/)|(?:\.pem|\.key|\.p12|\.pfx|\.local)$|^docs\/(?:HISTORY\.md|MONITORING_RUNBOOK\.md|archive\/)|(^|\/)\.env(?!\.example$)/i;
 const patterns = [
   ["private key", /-----BEGIN (?:RSA |EC |DSA |OPENSSH |ENCRYPTED )?PRIVATE KEY-----/],
   ["service token", /(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{30,}|sk-(?:proj-)?[A-Za-z0-9_-]{24,}|AKIA[0-9A-Z]{16}|xox[baprs]-[A-Za-z0-9-]{20,})/],
