@@ -33,6 +33,14 @@ function npmCli() {
     path.resolve(path.dirname(executable), "../lib/node_modules/npm/bin/npm-cli.js"),
     "/usr/share/nodejs/npm/bin/npm-cli.js",
   ];
+  // Homebrew and Linux packages may keep npm outside Node's own prefix.
+  for (const directory of (process.env.PATH ?? "").split(path.delimiter).filter(Boolean)) {
+    const command = path.join(directory, process.platform === "win32" ? "npm.cmd" : "npm");
+    try {
+      const resolved = realpathSync(command);
+      candidates.push(resolved, path.join(path.dirname(resolved), "node_modules/npm/bin/npm-cli.js"));
+    } catch { /* This PATH entry does not provide npm. */ }
+  }
   const cli = candidates.find(candidate => candidate && candidate.endsWith("npm-cli.js") && existsSync(candidate));
   if (!cli) throw new Error("找不到 npm。请使用项目的一键启动文件，它会准备完整 Node.js 环境。");
   return cli;
