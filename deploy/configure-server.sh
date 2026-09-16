@@ -1,6 +1,17 @@
 #!/bin/sh
 set -eu
 
+# One-time provisioning for a dedicated aaPanel host, not a general installer.
+if [ "${1:-}" != "--dedicated-aapanel-host" ]; then
+  echo "This script changes SSH/firewall and disables MySQL, PHP and FTP." >&2
+  echo "Review deploy/README.md and pass --dedicated-aapanel-host only on a dedicated host." >&2
+  exit 2
+fi
+[ "$(id -u)" -eq 0 ]
+test -d /www/server/panel/vhost/nginx
+test -f /tmp/nginx-7788.conf
+test -f /tmp/sshd-key-only.conf
+
 stamp="$(date +%Y%m%d-%H%M%S)"
 
 tar -czf "/root/7788-predeploy-${stamp}.tar.gz" \
@@ -8,7 +19,7 @@ tar -czf "/root/7788-predeploy-${stamp}.tar.gz" \
   /www/server/nginx/conf/nginx.conf \
   /etc/ssh/sshd_config \
   /etc/ssh/sshd_config.d \
-  2>/dev/null || true
+  2>/dev/null
 ufw status numbered > "/root/7788-predeploy-firewall-${stamp}.txt"
 
 install -m 0644 /tmp/nginx-7788.conf \

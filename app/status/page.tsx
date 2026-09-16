@@ -1,3 +1,4 @@
+import { siteConfig } from "@/lib/site-config";
 import type { Metadata } from "next";
 import { LatencyTester } from "../../components/latency-tester";
 import { StatusDashboard } from "../../components/status-dashboard";
@@ -30,7 +31,7 @@ export default function StatusPage() {
               id: "terraria",
               eyebrow: "PROBE / TERRARIA",
               label: "泰拉服",
-              gameEndpoint: "https://tr.7788oio.icu:28443/ping",
+              gameEndpoint: siteConfig.gameProbeUrl,
               websiteEndpoint: "/latency-probe.txt",
               available: true,
             },

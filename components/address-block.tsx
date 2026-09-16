@@ -11,7 +11,9 @@ export function AddressBlock({
   address?: string;
   label?: string;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
   const addressPending = address.trim() === "" || address === "待定";
 
   async function copyAddress() {
@@ -19,10 +21,11 @@ export function AddressBlock({
 
     try {
       await navigator.clipboard.writeText(address);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
+      setCopyState("copied");
     } catch {
-      setCopied(false);
+      setCopyState("failed");
+    } finally {
+      window.setTimeout(() => setCopyState("idle"), 1800);
     }
   }
 
@@ -36,9 +39,16 @@ export function AddressBlock({
         type="button"
         onClick={copyAddress}
         aria-label={addressPending ? "服务器地址待定" : "复制服务器地址"}
+        aria-live="polite"
         disabled={addressPending}
       >
-        {addressPending ? "待定" : copied ? "已复制" : "复制"}
+        {addressPending
+          ? "待定"
+          : copyState === "copied"
+            ? "已复制"
+            : copyState === "failed"
+              ? "复制失败"
+              : "复制"}
       </button>
     </div>
   );

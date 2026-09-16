@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const nav = [
   ["/terraria", "Terraria"],
@@ -8,7 +11,17 @@ const nav = [
   ["/mod-development", "帮我做 Mod"],
 ];
 
+function isNavActive(pathname: string, href: string) {
+  if (href === "/") {
+    return pathname === "/";
+  }
+
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export function SiteHeader() {
+  const pathname = usePathname();
+
   return (
     <header className="site-header">
       <div className="header-inner page-shell">
@@ -18,7 +31,13 @@ export function SiteHeader() {
         </Link>
         <nav className="site-nav" aria-label="主导航">
           {nav.map(([href, label]) => (
-            <Link href={href} key={href}>{label}</Link>
+            <Link
+              href={href}
+              key={href}
+              aria-current={isNavActive(pathname, href) ? "page" : undefined}
+            >
+              {label}
+            </Link>
           ))}
         </nav>
         <Link

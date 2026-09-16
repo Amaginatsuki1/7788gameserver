@@ -51,3 +51,18 @@ next-env.d.ts
 
 # separate legacy/reference site kept locally; not part of this Next.js deployment
 /MC宣传官网V2.2/
+
+# Local credentials, private operations notes and generated review material.
+*.key
+*.p12
+*.pfx
+*.local
+/AGENTS.md
+/PROJECT_HANDOFF.md
+/docs/MONITORING_RUNBOOK.md
+/docs/HISTORY.md
+/docs/archive/
+/.openai/
+/.codex/
+/.agents/
+/local-only/

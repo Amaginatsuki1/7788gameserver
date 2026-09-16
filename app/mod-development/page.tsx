@@ -92,10 +92,10 @@ export default function ModDevelopmentPage() {
           <div className="mod-dev-version-label">
             <span>CURRENT VERSION</span>
           </div>
-          <strong>0.1.7</strong>
+          <strong>0.1.12</strong>
           <p>
-            新增权威持续伤害统计、来源租约与分摊，补全 Boss 消失边界、
-            同场归因冻结，以及同一 Boss 再次召唤的独立记录。
+            修复分段与分裂 Boss 的重复挑战结算，新增嵌套 Boss 精确实例归属、
+            灾厄 Boss Rush 与天顶灾虫因果转场判定。
           </p>
         </div>
         <div>

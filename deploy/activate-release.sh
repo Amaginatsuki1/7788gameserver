@@ -1,35 +1,55 @@
 #!/bin/sh
 set -eu
 
-archive="${1:-/tmp/7788-web-upload.tar.gz}"
-release_name="$(date +%Y%m%d-%H%M%S)-reinstall"
-release="/srv/7788/releases/${release_name}"
-previous="$(readlink -f /srv/7788/current 2>/dev/null || true)"
-
-mkdir -p "$release"
+archive="${1:?Usage: activate-release.sh archive [release-name]}"
+release_name="${2:-$(date +%Y%m%d-%H%M%S)-reinstall}"
+case "$release_name" in ''|*[!A-Za-z0-9_-]*) echo "Invalid release name" >&2; exit 2;; esac
+site_root="${SITE_ROOT:-/srv/7788}"
+release="$site_root/releases/$release_name"
+previous="$(readlink -f "$site_root/current" 2>/dev/null || true)"
+# Never overwrite a retained release.
+mkdir -p "$site_root/releases"
+mkdir "$release"
 tar --warning=no-timestamp -xzf "$archive" -C "$release"
-ln -sfn "$release" /srv/7788/current.next
-mv -Tf /srv/7788/current.next /srv/7788/current
-rm -f "$archive"
-
-if ! nginx -t ||
-   ! test -f /srv/7788/current/index.html ||
-   ! curl -fsS --max-time 10 \
-       -H 'Host: 7788oio.icu' http://127.0.0.1/ >/dev/null
-then
-  if [ -n "$previous" ] && [ -d "$previous" ]; then
-    ln -sfn "$previous" /srv/7788/current.next
-    mv -Tf /srv/7788/current.next /srv/7788/current
+test -f "$release/index.html"
+nginx -t
+switched=false
+finish() {
+  code=$?
+  trap - EXIT HUP INT TERM
+  if [ "$code" -ne 0 ] && [ "$switched" = true ]; then
+    touch "$release/.failed"
+    if [ -n "$previous" ] && [ -d "$previous" ]; then
+      ln -sfn "$previous" "$site_root/current.next"
+      mv -Tf "$site_root/current.next" "$site_root/current"
+    else
+      rm -f "$site_root/current"
+    fi
+    echo "Activation failed; restored the previous release." >&2
   fi
-  echo "Release health check failed; restored the previous release." >&2
-  exit 1
-fi
-
-find /srv/7788/releases -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
-  sort -r |
-  tail -n +6 |
+  exit "$code"
+}
+trap finish EXIT
+trap 'exit 1' HUP INT TERM
+ln -sfn "$release" "$site_root/current.next"
+mv -Tf "$site_root/current.next" "$site_root/current"
+switched=true
+for route in / /terraria /terraria/join /minecraft /minecraft/join /status /updates /mod-development; do
+  curl -fsS --max-time 10 --resolve 7788oio.icu:443:127.0.0.1 "https://7788oio.icu$route" >/dev/null
+done
+curl -fsS --max-time 10 --resolve 7788oio.icu:443:127.0.0.1 https://7788oio.icu/api/status |
+  grep -q '"schemaVersion":1'
+if [ -n "$previous" ]; then basename "$previous" > "$release/.previous-release"; fi
+touch "$release/.healthy"
+switched=false
+rm -f "$archive"
+# Keep the active release and its immediate rollback target even after a rollback.
+find "$site_root/releases" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
+  sort -r | tail -n +6 |
   while IFS= read -r old_release; do
-    rm -rf -- "/srv/7788/releases/$old_release"
+    candidate="$site_root/releases/$old_release"
+    if [ "$candidate" != "$release" ] && [ "$candidate" != "$previous" ]; then
+      rm -rf -- "$candidate"
+    fi
   done
-
 printf 'ACTIVATED=%s\n' "$release_name"

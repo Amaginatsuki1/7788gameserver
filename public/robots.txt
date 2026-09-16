@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://7788oio.icu/sitemap.xml

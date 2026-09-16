@@ -131,31 +131,54 @@ class StatusStore:
                 f"SELECT * FROM samples {where} ORDER BY collected_at DESC LIMIT 1"
             ).fetchone()
 
-    def history(self) -> dict[str, list[float]]:
-        cutoff = int(time.time()) - HISTORY_SECONDS
+    def history(self) -> dict[str, Any]:
+        now = int(time.time())
+        cutoff = now - HISTORY_SECONDS
         with closing(self.connect()) as connection:
             rows = connection.execute(
                 """
-                SELECT
-                    (collected_at / 900) AS bucket,
-                    AVG(host_cpu_percent) AS cpu,
-                    AVG(host_memory_percent) AS memory
+                SELECT (collected_at / 900) AS bucket,
+                       AVG(host_cpu_percent) AS cpu,
+                       AVG(host_memory_percent) AS memory
                 FROM samples
-                WHERE source_ok = 1
-                  AND collected_at >= ?
-                GROUP BY bucket
-                ORDER BY bucket
+                WHERE source_ok = 1 AND collected_at >= ? AND collected_at <= ?
+                GROUP BY bucket ORDER BY bucket
                 """,
-                (cutoff,),
+                (cutoff, now),
             ).fetchall()
+            summary = connection.execute(
+                """
+                SELECT AVG(host_cpu_percent) AS cpu_avg,
+                       MAX(host_cpu_percent) AS cpu_peak,
+                       AVG(host_memory_percent) AS memory_avg,
+                       MAX(host_memory_percent) AS memory_peak
+                FROM samples
+                WHERE source_ok = 1 AND collected_at >= ? AND collected_at <= ?
+                """,
+                (cutoff, now),
+            ).fetchone()
 
-        cpu = [round(float(row["cpu"]), 1) for row in rows if row["cpu"] is not None]
-        memory = [
-            round(float(row["memory"]), 1)
-            for row in rows
-            if row["memory"] is not None
-        ]
-        return {"cpu": cpu, "memory": memory}
+        buckets = {int(row["bucket"]): row for row in rows}
+        result: dict[str, Any] = {
+            "windowStart": cutoff,
+            "windowEnd": now,
+            "bucketSeconds": 900,
+        }
+        for metric in ("cpu", "memory"):
+            # Keep the original arrays for clients using the previous API.
+            result[metric] = [rounded(row[metric]) for row in rows if row[metric] is not None]
+            result[f"{metric}Series"] = [
+                {
+                    "at": min(now, (bucket + 1) * 900),
+                    "value": rounded(buckets[bucket][metric]) if bucket in buckets else None,
+                }
+                for bucket in range(cutoff // 900, now // 900 + 1)
+            ]
+            result[f"{metric}Summary"] = {
+                "average": rounded(summary[f"{metric}_avg"]),
+                "peak": rounded(summary[f"{metric}_peak"]),
+            }
+        return result
 
 
 class Collector:
@@ -408,8 +431,7 @@ def public_payload(store: StatusStore) -> dict[str, Any]:
         },
         "history": {
             "periodHours": 24,
-            "cpu": history["cpu"],
-            "memory": history["memory"],
+            **history,
         },
     }
 

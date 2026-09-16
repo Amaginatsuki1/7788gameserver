@@ -1280,7 +1280,7 @@ export function ModArchitectureExplorer() {
         <div className="mod-architecture-code">
           <div className="mod-architecture-code-intro">
             <span>PINNED SOURCE / 0.1.7 RELEASE</span>
-            <p>以下片段固定到公开 main 的 0.1.7 发布提交，并按当前技术域完整展开。</p>
+            <p>以下片段固定到公开 main 的 0.1.7 发布提交（当前最新公开源码），并按当前技术域完整展开。</p>
           </div>
           <div className="mod-architecture-code-tabs" aria-label="源码位置">
             {activeArea.code.map((reference, index) => (

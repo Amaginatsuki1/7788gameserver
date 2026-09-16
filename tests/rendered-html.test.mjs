@@ -79,10 +79,15 @@ test("updates page renders the document A/B/C hierarchy", async () => {
   assert.match(html, /同时多 Boss 改为独立统计与即时结算/);
   assert.match(html, /从 0\.1\.6 更新至 0\.1\.7/);
   assert.match(html, /新增权威持续伤害统计/);
+  assert.match(html, /从 0\.1\.7 更新至 0\.1\.8/);
+  assert.match(html, /从 0\.1\.8 更新至 0\.1\.12/);
+  assert.match(html, /结果协议升级为 v7/);
   assert.doesNotMatch(html, /正式游戏服同步前仍需核验精确 Steam 发布包/);
   assert.match(html, /class="timeline-details"/);
   assert.doesNotMatch(html, />[abc]\s/);
 
+  const latestRecord = html.indexOf("从 0.1.8 更新至 0.1.12");
+  const latestMidRecord = html.indexOf("从 0.1.7 更新至 0.1.8");
   const newestRecord = html.indexOf("从 0.1.6 更新至 0.1.7");
   const previousPublicRecord = html.indexOf("从 0.1.5 更新至 0.1.6");
   const previousVersionRecord = html.indexOf("从 0.1.3 更新至 0.1.5");
@@ -91,7 +96,9 @@ test("updates page renders the document A/B/C hierarchy", async () => {
   const versionRecord = html.indexOf("从 2026.05.3.0 更新至 2026.06.3.4");
   const worldCreatedRecord = html.indexOf("Terraria 正式创建世界");
   const oldestRecord = html.indexOf("服务器配置完成");
-  assert.ok(newestRecord < previousPublicRecord, "the 0.1.7 update should render first");
+  assert.ok(latestRecord < latestMidRecord, "the 0.1.12 update should render first");
+  assert.ok(latestMidRecord < newestRecord, "the 0.1.8 update should follow 0.1.12");
+  assert.ok(newestRecord < previousPublicRecord, "the 0.1.7 update should follow 0.1.8");
   assert.ok(previousPublicRecord < previousVersionRecord, "the 0.1.6 update should follow 0.1.7");
   assert.ok(previousVersionRecord < workshopRecord, "same-day updates should render newest first");
   assert.ok(workshopRecord < previousRecord, "same-day updates should render newest first");
@@ -100,7 +107,7 @@ test("updates page renders the document A/B/C hierarchy", async () => {
   assert.ok(worldCreatedRecord < oldestRecord, "the oldest update should render last");
 });
 
-test("mod development page separates runtime logic from the published 0.1.7 implementation", async () => {
+test("mod development page separates runtime logic from the pinned public implementation", async () => {
   const response = await render("/mod-development");
   const html = await response.text();
   const explorerSource = await readFile(
@@ -118,7 +125,8 @@ test("mod development page separates runtime logic from the published 0.1.7 impl
   assert.match(html, /有建议？欢迎！/);
   assert.match(html, /请跳转 GitHub Issues \/ Steam 创意工坊讨论区/);
   assert.match(html, /CURRENT VERSION/);
-  assert.match(html, /0\.1\.7/);
+  assert.match(html, /0\.1\.12/);
+  assert.match(html, /0\.1\.7 发布提交（当前最新公开源码）/);
   assert.doesNotMatch(html, /0\.1\.6/);
   assert.doesNotMatch(html, /SERVER SYNC/);
   assert.match(html, /战斗统计系统 · 可钻取架构总览/);
@@ -193,8 +201,10 @@ test("status dashboard uses the exact public API endpoint", async () => {
 
   assert.match(
     source,
-    /const STATUS_API_URL = "https:\/\/7788oio\.icu\/api\/status"/,
+    /const STATUS_API_URL = siteConfig\.statusApiUrl/,
   );
+  const config = await readFile(new URL("../lib/site-config.ts", import.meta.url), "utf8");
+  assert.match(config, /https:\/\/7788oio\.icu\/api\/status/);
   assert.doesNotMatch(source, /api\/status\?/);
   assert.doesNotMatch(source, /演示数据/);
 });
@@ -335,7 +345,8 @@ test("formal copy and mobile guide layout keep the public pages release-ready", 
   assert.match(terrariaSource, /7788 Terraria 探索战斗服的玩法、版本和模组概览/);
   assert.doesNotMatch(`${layoutSource}\n${terrariaSource}`, /Terraria 灾厄服|灾厄整合服/);
   assert.match(addressSource, /disabled=\{addressPending\}/);
-  assert.match(addressSource, /addressPending \? "待定"/);
+  assert.match(addressSource, /addressPending\s*\?\s*"待定"/);
+  assert.match(addressSource, /aria-live="polite"/);
   assert.match(headerSource, /aria-label="查看服务器状态"/);
   assert.match(terrariaJoinSource, /如果打不出字母/);
   assert.match(terrariaJoinSource, /先检查是不是忘记切换英文输入法/);

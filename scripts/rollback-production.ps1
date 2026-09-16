@@ -2,6 +2,8 @@ param(
   [Parameter(Mandatory = $true)]
   [string]$HostName,
   [string]$UserName = "root",
+  [ValidatePattern("^[A-Za-z0-9_-]+$")]
+  [string]$ReleaseName,
   [string]$IdentityFile = (
     Join-Path ([Environment]::GetFolderPath("UserProfile")) ".ssh\7788_web_ed25519"
   ),
@@ -29,37 +31,8 @@ $sshOptions = @(
   "-o", "UserKnownHostsFile=$KnownHostsFile"
 )
 
-$remoteScript = @'
-set -eu
-current="$(readlink -f /srv/7788/current || true)"
-previous="$(
-  find /srv/7788/releases -mindepth 1 -maxdepth 1 -type d -printf '%f\n' |
-    sort -r |
-    while IFS= read -r release; do
-      candidate="/srv/7788/releases/$release"
-      if [ "$candidate" != "$current" ]; then
-        printf '%s\n' "$candidate"
-        break
-      fi
-    done
-)"
-if [ -z "$previous" ]; then
-  echo "No previous release is available." >&2
-  exit 1
-fi
-ln -sfn "$previous" /srv/7788/current.next
-mv -Tf /srv/7788/current.next /srv/7788/current
-nginx -t
-test -f /srv/7788/current/index.html
-curl -fsS --max-time 10 \
-  -H 'Host: 7788oio.icu' http://127.0.0.1/ >/dev/null
-curl -fsS --max-time 10 \
-  --resolve 7788oio.icu:443:127.0.0.1 \
-  https://7788oio.icu/api/status | grep -q '"schemaVersion":1'
-printf 'Rolled back to %s\n' "$(basename "$previous")"
-'@
-
-& ssh @sshOptions $remoteTarget $remoteScript
+$remoteScript = Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot "../deploy/rollback-release.sh")
+$remoteScript | & ssh @sshOptions $remoteTarget "sh -s -- '$ReleaseName'"
 if ($LASTEXITCODE -ne 0) {
   throw "Rollback failed."
 }

@@ -12,6 +12,8 @@ export type GuideStep = {
   image?: {
     src: string;
     alt: string;
+    width?: number;
+    height?: number;
   };
   images?: {
     src: string;
@@ -20,6 +22,8 @@ export type GuideStep = {
     compact?: boolean;
     emphasis?: boolean;
     emphasisLabel?: string;
+    width?: number;
+    height?: number;
   }[];
   action?: {
     label: string;
@@ -191,7 +195,12 @@ export function JoinGuidePage({
                               {image.caption ? <strong>{image.caption}</strong> : null}
                             </div>
                           ) : null}
-                          <img src={image.src} alt={image.alt} />
+                          <img
+                            src={image.src}
+                            alt={image.alt}
+                            width={image.width}
+                            height={image.height}
+                          />
                           {image.caption && !image.emphasis ? (
                             <span>{image.caption}</span>
                           ) : null}

@@ -194,5 +194,30 @@ class CollectorTests(unittest.TestCase):
         self.assertIsNotNone(latency)
 
 
+class HistoryTests(unittest.TestCase):
+    def test_preserves_gaps_and_raw_peaks_and_legacy_arrays(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = status_backend.StatusStore(Path(directory) / "history.sqlite3")
+            now = int(time.time())
+            bucket = now // 900 * 900
+            for timestamp, cpu in [(bucket - 3600, 10), (bucket - 3590, 100), (bucket - 60, 20)]:
+                store.insert(sample(collected_at=timestamp, host_cpu_percent=cpu))
+            history = store.history()
+            self.assertEqual(history["cpu"], [55.0, 20.0])
+            self.assertEqual(history["cpuSummary"], {"average": 43.3, "peak": 100.0})
+            self.assertTrue(any(point["value"] is None for point in history["cpuSeries"]))
+            self.assertEqual(history["windowEnd"] - history["windowStart"], 86400)
+            self.assertEqual(history["cpuSeries"][-1]["at"], history["windowEnd"])
+
+    def test_empty_history_is_unknown_and_future_samples_are_excluded(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            store = status_backend.StatusStore(Path(directory) / "history.sqlite3")
+            store.insert(sample(collected_at=int(time.time()) + 3600))
+            history = store.history()
+            self.assertEqual(history["cpu"], [])
+            self.assertEqual(history["cpuSummary"], {"average": None, "peak": None})
+            self.assertTrue(all(point["value"] is None for point in history["cpuSeries"]))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,3 +1,5 @@
+import imageExtensions from "./mod-image-extensions.json";
+
 export type ModInfo = {
   id: string;
   name: string;
@@ -14,7 +16,7 @@ const steamWorkshopMod = (
   id,
   name,
   description,
-  image: `/mod-terraria-${id}.jpg`,
+  image: `/mod-terraria-${id}.${(imageExtensions as Record<string, string>)[id] ?? "jpg"}`,
   workshopUrl: `https://steamcommunity.com/sharedfiles/filedetails/?id=${id}`,
 });
 
@@ -47,7 +49,7 @@ export const terrariaMods: ModInfo[] = [
   steamWorkshopMod(
     "3776927292",
     "Daybreak DamageTracker",
-    "自制 Boss 伤害统计模组。0.1.7 已公开，支持直接伤害与持续伤害、每只 Boss 独立结算、本人来源树和历史记录。",
+    "自制 Boss 伤害统计模组。0.1.12 已公开，支持直接伤害与持续伤害、每只 Boss 独立结算、本人来源树和历史记录。",
   ),
   steamWorkshopMod(
     "2825151264",

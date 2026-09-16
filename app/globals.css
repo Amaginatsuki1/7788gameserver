@@ -87,6 +87,11 @@ button { font: inherit; }
   transition: background 160ms ease;
 }
 .site-nav a:hover { background: var(--interactive); }
+.site-nav a[aria-current="page"] {
+  background: var(--interactive);
+  color: var(--ivory);
+  font-weight: 480;
+}
 .header-status {
   display: inline-flex;
   align-items: center;
@@ -2571,6 +2576,7 @@ button { font: inherit; }
   .site-nav a { flex: none; padding: 7px 9px; font-size: 13px; }
   .header-status { padding: 8px 12px; }
   .header-status span:last-child { display: none; }
+  .guide-step { scroll-margin-top: 136px; }
   .hero { min-height: 880px; padding: 150px 0 320px; background-position: 60% center; }
   .dual-world-hero { --spotlight-radius: 155px; }
   .dual-world-image { object-position: 60% center; }

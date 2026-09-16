@@ -159,6 +159,8 @@ export function DualWorldHero({ children }: DualWorldHeroProps) {
           alt=""
           draggable="false"
           fetchPriority="high"
+          width={1983}
+          height={793}
         />
         <div className="dual-world-reveal">
           <img
@@ -167,6 +169,8 @@ export function DualWorldHero({ children }: DualWorldHeroProps) {
             alt=""
             draggable="false"
             fetchPriority="high"
+            width={1983}
+            height={793}
           />
         </div>
         <div className="dual-world-grade" />

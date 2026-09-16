@@ -119,6 +119,26 @@ const updates = [
       "同一 Boss 再次召唤使用独立账本、历史与面板身份",
     ],
   },
+  {
+    date: "2026.08.14",
+    title: "更新 Daybreak DamageTracker",
+    subtitle: "从 0.1.7 更新至 0.1.8。",
+    details: [
+      "修复星神游龙等分裂 Boss 重复击败并掉落战利品，却因残余体节失活被显示为已逃离的问题",
+      "每只 Boss 独立确认最终离场，不再等待同时战斗的其他 Boss，也不会被同时团灭改写",
+      "保留无击杀证据即按逃离结算的保守规则，死亡动画与槽位复用不再干扰判定",
+    ],
+  },
+  {
+    date: "2026.08.15",
+    title: "更新 Daybreak DamageTracker",
+    subtitle: "从 0.1.8 更新至 0.1.12。",
+    details: [
+      "修复神明吞噬者等分段 Boss 拆出重复结算、星神游龙重复挑战误报逃离等分段判定问题",
+      "Boss 生成的护盾、召唤物与嵌套 Boss 按精确实例归入父 Boss，同类独立目标保留独立结算",
+      "聊天栏连续结算合并输出，结果协议升级为 v7，客户端与服务端需保持同版",
+    ],
+  },
 ];
 
 const updatesNewestFirst = [...updates].reverse();

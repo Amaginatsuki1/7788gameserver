@@ -1,60 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { fetchStatus, isStatusExpired, type StatusPayload } from "@/lib/status-client";
+import { siteConfig } from "@/lib/site-config";
 import { MetricBar } from "./metric-bar";
 import { ResourceTrendChart } from "./resource-trend-chart";
 import { StatusBadge, type StatusTone } from "./status-badge";
 
-const STATUS_API_URL = "https://7788oio.icu/api/status";
+const STATUS_API_URL = siteConfig.statusApiUrl;
 const STATUS_POLL_INTERVAL_MS = 10_000;
 
-type StatusPayload = {
-  schemaVersion: number;
-  generatedAt: string;
-  stale: boolean;
-  collector: {
-    ok: boolean;
-    lastSuccessAt: string | null;
-    intervalSeconds: number;
-  };
-  terraria: {
-    deployed: true;
-    online: boolean | null;
-    players: number | null;
-    maxPlayers: number;
-    address: string;
-    version: string;
-    world: string;
-    worldType: string;
-    modCount: number;
-    restarts: number | null;
-    gameLatencyMs: number | null;
-    process: {
-      cpuPercent: number | null;
-      memoryBytes: number | null;
-      memoryPercent: number | null;
-    };
-  };
-  minecraft: {
-    deployed: false;
-    online: null;
-    players: null;
-    maxPlayers: number;
-    address: string;
-  };
-  host: {
-    cpuPercent: number | null;
-    memoryPercent: number | null;
-    dataDiskPercent: number | null;
-    networkRxBytesPerSecond: number | null;
-    networkTxBytesPerSecond: number | null;
-  };
-  history: {
-    periodHours: number;
-    cpu: number[];
-    memory: number[];
-  };
-};
 
 function formatLatency(value: number | null | undefined) {
   if (value == null) {
@@ -103,7 +58,14 @@ function formatUpdatedAt(value: string | null | undefined) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return null;
 
+  const now = new Date();
+  const sameDay =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
   return new Intl.DateTimeFormat("zh-CN", {
+    ...(sameDay ? {} : { month: "2-digit", day: "2-digit" }),
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -136,6 +98,7 @@ function formatLatestScheduledBackup(value: string | null | undefined) {
 export function StatusDashboard() {
   const [status, setStatus] = useState<StatusPayload | null>(null);
   const [requestFailed, setRequestFailed] = useState(false);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -145,27 +108,26 @@ export function StatusDashboard() {
       if (document.visibilityState === "hidden") return;
 
       controller?.abort();
-      controller = new AbortController();
+      const requestController = new AbortController();
+      controller = requestController;
+      setNow(Date.now());
       try {
-        const response = await fetch(STATUS_API_URL, {
-          cache: "no-store",
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`Status API returned ${response.status}`);
-        const next = (await response.json()) as StatusPayload;
-        if (next.schemaVersion !== 1) throw new Error("Unsupported status schema");
-        if (active) {
+        const next = await fetchStatus(STATUS_API_URL, requestController.signal);
+        if (active && controller === requestController && !requestController.signal.aborted) {
           setStatus(next);
           setRequestFailed(false);
+          setNow(Date.now());
         }
-      } catch (error) {
-        if (active && !(error instanceof DOMException && error.name === "AbortError")) {
+      } catch {
+        // Superseded requests and unmounts are silent; timeouts are failures.
+        if (active && controller === requestController && !requestController.signal.aborted) {
           setRequestFailed(true);
         }
       }
     };
 
     void refresh();
+    const clock = window.setInterval(() => setNow(Date.now()), 1_000);
     const interval = window.setInterval(() => {
       void refresh();
     }, STATUS_POLL_INTERVAL_MS);
@@ -189,6 +151,7 @@ export function StatusDashboard() {
       active = false;
       controller?.abort();
       window.clearInterval(interval);
+      window.clearInterval(clock);
       document.removeEventListener("visibilitychange", refreshWhenVisible);
       window.removeEventListener("focus", refreshWhenFocused);
       window.removeEventListener("online", refreshWhenOnline);
@@ -198,7 +161,7 @@ export function StatusDashboard() {
   const terraria = status?.terraria;
   const host = status?.host;
   const dataUnavailable =
-    !status || status.stale || !status.collector.ok || requestFailed;
+    !status || status.stale || !status.collector.ok || requestFailed || isStatusExpired(status, now);
   const terrariaOnline = dataUnavailable ? null : terraria?.online ?? null;
   const playerCountAvailable =
     !dataUnavailable && terraria?.players != null;
@@ -219,7 +182,7 @@ export function StatusDashboard() {
           ? null
           : [host.memoryPercent];
   const latestUpdate = formatUpdatedAt(
-    dataUnavailable ? status?.collector.lastSuccessAt : status?.generatedAt,
+    status?.collector.lastSuccessAt,
   );
 
   return (
@@ -358,11 +321,21 @@ export function StatusDashboard() {
             <ResourceTrendChart
               label="CPU 使用率"
               data={cpuHistory?.map(roundedMetric) ?? null}
+              currentValue={dataUnavailable ? null : host?.cpuPercent ?? null}
+              points={dataUnavailable ? undefined : status?.history.cpuSeries}
+              summary={dataUnavailable ? undefined : status?.history.cpuSummary}
+              windowStart={status?.history.windowStart}
+              windowEnd={status?.history.windowEnd}
               color="#7182ff"
             />
             <ResourceTrendChart
               label="内存使用率"
               data={memoryHistory?.map(roundedMetric) ?? null}
+              currentValue={dataUnavailable ? null : host?.memoryPercent ?? null}
+              points={dataUnavailable ? undefined : status?.history.memorySeries}
+              summary={dataUnavailable ? undefined : status?.history.memorySummary}
+              windowStart={status?.history.windowStart}
+              windowEnd={status?.history.windowEnd}
               color="#55bca9"
             />
           </div>

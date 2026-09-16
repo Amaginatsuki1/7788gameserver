@@ -1,10 +1,11 @@
+import { siteConfig } from "@/lib/site-config";
 import type { Metadata } from "next";
 import "./globals.css";
 import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://7788oio.icu"),
+  metadataBase: new URL(siteConfig.siteUrl),
   title: {
     default: "7788 游戏服务器",
     template: "%s · 7788 游戏服务器",
