@@ -39,10 +39,7 @@ jobs:
         with:
           node-version: '24'
       - name: Extract source without Git metadata
-        shell: bash
-        run: |
-          mkdir -p "$RUNNER_TEMP/7788 preview"
-          git archive HEAD | tar -x -C "$RUNNER_TEMP/7788 preview"
+        run: node scripts/test-preview.mjs --extract
       - name: Prepare portable Node and dependencies (Windows)
         if: runner.os == 'Windows'
         shell: powershell

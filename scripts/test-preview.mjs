@@ -1,10 +1,22 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { once } from "node:events";
 import net from "node:net";
 import path from "node:path";
-import { readFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import { projectRoot } from "./preview.mjs";
+
+if (process.argv.includes("--extract")) {
+  assert.ok(process.env.RUNNER_TEMP, "RUNNER_TEMP must identify the CI temporary directory");
+  const fixture = path.join(process.env.RUNNER_TEMP, "7788 preview");
+  const archive = path.join(process.env.RUNNER_TEMP, "7788-preview-source.tar");
+  await mkdir(fixture);
+  execFileSync("git", ["archive", "--format=tar", "--output", archive, "HEAD"], { cwd: projectRoot });
+  const tar = process.platform === "win32" ? path.join(process.env.SystemRoot, "System32", "tar.exe") : "tar";
+  execFileSync(tar, ["-xf", archive, "-C", fixture]);
+  console.log("Extracted clean source without Git metadata.");
+  process.exit(0);
+}
 
 // Simulate an unrelated application occupying the default preview port.
 const unrelated = net.createServer(socket => socket.end("not this project"));
